@@ -45,6 +45,9 @@
   #define TEXT18 "Fin -> Pot Ch < 10%"
   #define TEXT19 "   Attente Homing   "
   #define TEXT20 " Homing Termine     "
+
+  #define BUZZ_ON "BUZZER ON"
+  #define BUZZ_OFF "BUZZER OFF"
 #endif        
 
 // I suggest the following as they read better in English

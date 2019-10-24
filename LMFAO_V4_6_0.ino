@@ -65,8 +65,9 @@
 /* External library */
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <LiquidCrystal.h>
 #include <avr/iom2560.h>
+#include <LiquidCrystal.h>
+#include "U8glib.h"
 
 /* Internal header */
 #include "conf.h"
@@ -74,7 +75,6 @@
 
 
 /* DEFINE */
-
 
 #if BAUDRATE == 9600
 	#define UBRR0_BAUDRATE_VALUE 207 // Value for USART clock register for 9600 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
@@ -259,8 +259,12 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 //#define ENABLE_T4_COMP_OUTPUT_C() TCCR4A |= 0x08
 //#define DISABLE_T4_COMP_OUTPUT_C() TCCR4A &= 0xF3
 
+//MATRIX declaration
+	U8GLIB_ST7920_128X64_1X u8g(23, 17, 16); // SPI Com: SCK = en = 23, MOSI = rw = 17, CS = di = 16  RepRap Discount Full Graphic Smart Controller - RAMPS
+	#define WIDTH_FONT 6
+	#define HEIGH_FONT 13
 //LCD declaration
-LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+	LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 volatile bool toogle = true;
 bool StepperDriverEnableMode = STEPPER_DRIVER_ENABLE_HIGH_LEVEL;
@@ -459,7 +463,7 @@ void setup (void)
 	pinMode (PIN_SWITCH_HEATING_PC, INPUT); //Switch Wire heat mode PC -> Low state = control by PC / high state = OFF or Manu
 	digitalWrite(PIN_SWITCH_HEATING_PC, HIGH); // Atmega internal Pullup Activated
 
-	pinMode (PIN_SWITCH_HEATING_MANU, INPUT); //Switch Wire heat mode manu -> low state = manu / high state = OFF or PC
+	pinMode (PIN_SWITCH_HEATING_MANU, INPUT); //Swipch Wire heat mode manu -> low state = manu / high state = OFF or PC
 	digitalWrite(PIN_SWITCH_HEATING_MANU, HIGH); // Atmega internal Pullup Activated
 
 	pinMode (PIN_SWITCH_HEATING_CUTTER, INPUT); //Switch Cutter heat mode -> disable if switch control mode is on PC mode else low state = ON / high state = OFF
@@ -535,7 +539,7 @@ void setup (void)
 	TIMSK4 = 0x00;	// Reset interrupt flag
 	TIFR4 = 0x00;	// disable interrupt
 	TCCR4A = 0x0A;	// configure timer in Fast PWM mode, disable Output Compare pins A and B and enable Output Compare pin C
-	TCCR4B = 0x1C;	// configure timer in Fast PWM mode and set prescaler to 256
+	TCCR4B = 0x1C;	// conbigure timer in Fast PWM mode and set prescaler to 256
 	TCCR4C = 0x00;  // Disable Input capture
 	ICR4 = 100;		// Set Top value => Fosc = 16MHz, Prescaler = 256, Compare value = 200 -> Fpwm = 1 / (100 * 256 * 62.5e-9) = 10 KHz
 	OCR4C = 0;		// Set compare value => Compare value between 0 = 0% PWM and 200 = 100% PWM
@@ -567,6 +571,23 @@ void setup (void)
   //<
 }
 
+//==============================================================================
+//  Test  des fins de course
+//==============================================================================
+ void Test_fdc()
+ {
+ do
+ {
+  limits_Lect();
+  Aff_Test_Fdc();
+    
+ Heat.WireConsign = map(analogRead (PIN_POT_WIRE), 0, 1023, 0, MAX_PERCENTAGE_WIRE);
+ }while (Heat.WireConsign >10);
+  limits_Lect();
+}
+//-----------------------------------------------------------------------------
+ 
+
 /**********************************************************************************/
 //==============================================================================
 // Aide à la mise en service des fins de course
@@ -582,38 +603,18 @@ void AideMiseServiceFdc(void)
 
 
 }
-
 //------------------------------------------------------------------------------
 
-//==============================================================================
-//  Test  des fins de course
-//==============================================================================
- void Test_fdc()
- {
- do
- {
-  limits_Lect();
-  Aff_Test_Fdc();
-    
- Heat.WireConsign = map(analogRead (PIN_POT_WIRE), 0, 1023, 0, MAX_PERCENTAGE_WIRE);
- }while (Heat.WireConsign >10);
-  limits_Lect();
-}
- //-----------------------------------------------------------------------------
- 
  //==============================================================================
 // Affichage de la Trame Etat Fins de course
 //==============================================================================
 void Affic_Trame_fdc()
 {
   lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(TEXT17);    // " Etat fin de course"
-  lcd.setCursor(0, 1);
-  lcd.print ("  X1   Y1   X2   Y2") ;
-  lcd.setCursor(0, 3);
-  lcd.print (TEXT18);  // "Fin -> Pot Ch < 10%"
+  clearLCD();
+  printLCD(0,0,TEXT17); // " Etat fin de course"
+  printLCD(0,1,"  X1   Y1   X2   Y2");
+  printLCD(0,3,TEXT18); // "Fin -> Pot Ch < 10%"
 }
 //------------------------------------------------------------------------------
 
@@ -637,14 +638,10 @@ void limits_Lect()
 //==============================================================================
 void Aff_Test_Fdc ()
  {
-  lcd.setCursor(2, 2);
-  lcd.print (Val_X1_Limit,DEC);
-  lcd.setCursor(7, 2);
-  lcd.print (Val_Y1_Limit,DEC);
-  lcd.setCursor(12, 2);
-  lcd.print (Val_X2_Limit,DEC);
-  lcd.setCursor(17, 2);
-  lcd.print (Val_Y2_Limit,DEC);   
+		printLCD(2,2,Val_X1_Limit);
+		printLCD(7, 2,Val_Y1_Limit);
+		printLCD(12, 2,Val_X2_Limit);
+		printLCD(17, 2,Val_Y2_Limit); 
   delay(100);// Attendre 100ms
  }
 //------------------------------------------------------------------------------
@@ -661,9 +658,8 @@ void HomingManage ()
     {
     StepperDriverEnable(ON);
     Arm_Homing ();
-    
-    lcd.setCursor(0, 1);
-    lcd.print("MODE E MOT WIRE  CUT");
+
+		printLCD(0,1,"MODE E MOT WIRE  CUT");
     GetSwitchStatus ();
     HMI_ModeScreen ();
     
@@ -684,34 +680,25 @@ void Arm_Homing ()
 {
   if (SEQ_HOMING == 1)
   {
+		printLCD(0,1,TEXT19);
+		printLCD(0,1,TEXT19);
+		printLCD(0, 2,"C1a C1 C2 C3 C4 Ppos");
+		printLCD(0, 3,"                    ");
 
-    lcd.setCursor(0, 1);
-    lcd.print(TEXT19);  // "   Attente Homing   "
-    lcd.setCursor(0, 2);
-    lcd.print("C1a C1 C2 C3 C4 Ppos");
-    lcd.setCursor(0, 3);
-    lcd.print("                    ");
-    do
-    {
-    }
     while ((digitalRead (PIN_BP_HOMING)== HIGH)) ; 
     homing_set();
     if (PREPOS ==1)
     {
       prepos_set();
     }
-    lcd.setCursor(0, 1);
-    lcd.print(TEXT20);  //" Homing Termine     "
+
+		printLCD(0,1,TEXT20);
     delay (1000);
     
     if (MOTEUR_ON_ASSERVI == 1)
     {
       StepperDriverEnable(ON); 
-    }
-
-
-
-      
+    } 
       Switch.HomingOk = true ;
   } 
 
@@ -742,17 +729,12 @@ void Desar_Homing ()
 
 void homing_set ()
 {
-
-
-    lcd.setCursor(0, 1);
-    lcd.print(TEXT13);    //"   Homing en cours  "
+		printLCD(0,1,TEXT13);
   
     cycle_1();
     cycle_2();
     cycle_3();
     cycle_4();
-
-
 }
 //------------------------------------------------------------------------------
 
@@ -769,8 +751,7 @@ void cycle_1()
   {
     unsigned int Nbre_pas = MM_POS_SECU_Y / MM_PER_STEP ;
     
-    lcd.setCursor(0, 3);
-    lcd.print("===");
+		printLCD(0,3,"===");
     
     for (unsigned int i = Nbre_pas ; i > 0 ; i--)
     {
@@ -781,36 +762,33 @@ void cycle_1()
   }
 
   // Recherche fdc X1 et X2
+
+		printLCD(3,3,"==");
   
-  lcd.setCursor(3, 3);
-  lcd.print("==");
-  
-  do
-  {
-    limits_Lect();
-    tr_mask_limits = mask_limits ^ 0xFF ;
-    h_motCkDir = 0xF3; // 11110011
-    h_motCkDir = h_motCkDir & tr_mask_limits ;
-    ProcessStep(h_motCkDir);
-    delayMicroseconds(tempo_step); 
-  }
-  while (mask_limits < 0x03);  
+	do
+	{
+		limits_Lect();
+		tr_mask_limits = mask_limits ^ 0xFF ;
+		h_motCkDir = 0xF3; // 11110011
+		h_motCkDir = h_motCkDir & tr_mask_limits ;
+		ProcessStep(h_motCkDir);
+		delayMicroseconds(tempo_step); 
+	}
+	while (mask_limits < 0x03);  
 
   // Recherche fdc Y1 et Y2
-  
-  lcd.setCursor(5, 3);
-  lcd.print("==");
- 
-  do
-  {
-    limits_Lect();
-    tr_mask_limits = mask_limits ^ 0xFF ;
-    h_motCkDir = 0xFC; //11111100
-    h_motCkDir = h_motCkDir & tr_mask_limits ;
-    ProcessStep(h_motCkDir);
-    delayMicroseconds(tempo_step); 
-  }
-  while (mask_limits < 0x0F); 
+
+		printLCD(5,3,"==");
+	do
+	{
+		limits_Lect();
+		tr_mask_limits = mask_limits ^ 0xFF ;
+		h_motCkDir = 0xFC; //11111100
+		h_motCkDir = h_motCkDir & tr_mask_limits ;
+		ProcessStep(h_motCkDir);
+		delayMicroseconds(tempo_step); 
+	}
+	while (mask_limits < 0x0F); 
 }
 //------------------------------------------------------------------------------
 
@@ -819,25 +797,25 @@ void cycle_1()
 //==============================================================================
 void cycle_2()
 { 
-  lcd.setCursor(7, 3);
-  lcd.print("==");
+
+		printLCD(7,3,"==");
   
-  byte tr_mask_limits =0 ;
-  
-  //calcul de la tempo entre chaque step pour la vitesse lente (ajuste)  
-  unsigned int tempo_step = MM_PER_STEP / VIT_AJUST_FDC * 1000000 ; 
-  
-  // Avance des 4 axes jusqu'à ce que les fins de course soient sollicités
-  do
-  {
-    limits_Lect();
-    tr_mask_limits = mask_limits ^ 0x00 ;
-    h_motCkDir = 0x0F; //00001111
-    h_motCkDir = h_motCkDir & tr_mask_limits ;
-    ProcessStep(h_motCkDir);
-    delayMicroseconds(tempo_step);
-  }
-  while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
+	byte tr_mask_limits =0 ;
+	
+	//calcul de la tempo entre chaque step pour la vitesse lente (ajuste)  
+	unsigned int tempo_step = MM_PER_STEP / VIT_AJUST_FDC * 1000000 ; 
+	
+	// Avance des 4 axes jusqu'à ce que les fins de course soient sollicités
+	do
+	{
+		limits_Lect();
+		tr_mask_limits = mask_limits ^ 0x00 ;
+		h_motCkDir = 0x0F; //00001111
+		h_motCkDir = h_motCkDir & tr_mask_limits ;
+		ProcessStep(h_motCkDir);
+		delayMicroseconds(tempo_step);
+	}
+	while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
 }
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -846,8 +824,8 @@ void cycle_2()
 
 void cycle_3()
 { 
-  lcd.setCursor(9, 3);
-  lcd.print("===");
+
+		printLCD(9,3,"===");
   
   byte tr_mask_limits =0 ;
  
@@ -871,8 +849,8 @@ void cycle_3()
 //==============================================================================
 void cycle_4()
 {
-  lcd.setCursor(12, 3);
-  lcd.print("====");
+
+		printLCD(12,3,"====");
   
   byte tr_mask_limits =0 ;
  
@@ -898,8 +876,7 @@ void cycle_4()
 //==============================================================================
 void prepos_set()
 { 
-  lcd.setCursor(16, 3);
-  lcd.print("====");
+		printLCD(16,3,"====");
 
   //calcul de la tempo pour la vitesse de déplacement (Grande Vitesse).
   unsigned int tempo_step = MM_PER_STEP / VIT_RECH_FDC * 1000000 ; 
@@ -924,12 +901,11 @@ void prepos_set()
 }
 //------------------------------------------------------------------------------
 
-//==============================================================================
+//=====================================9========================================
 // End Stop Manage  sur une detection de End Stop en Mode Auto
 //==============================================================================
 void EndStopManage ()
 {
-
   if (Switch.HomingOk == true )
   {
   //arretPropreMachine();
@@ -941,8 +917,6 @@ void EndStopManage ()
     Desar_Homing (); 
     }
   }
-
-
 }
 
 //==============================================================================
@@ -950,35 +924,24 @@ void EndStopManage ()
 //==============================================================================
 void Trait_Arr_fdc()
 {
- 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(TEXT11);    //" Etat fin de course"
-  lcd.setCursor(0, 1);
-  lcd.print ("  X1   Y1   X2   Y2") ;
-  lcd.setCursor(0, 3);
-  lcd.print(TEXT12);    //" --> BP Homing"
-  Aff_Test_Fdc ();
-  do
-    {
-      //alarmSonor();  
-    }while (digitalRead (PIN_BP_HOMING)== HIGH);
-     SoundAlarm(OFF);
-  do
-    {
- 
-    }while (digitalRead (PIN_BP_HOMING)== LOW);
+	clearLCD();
+	printLCD(0,0,TEXT11);
+	printLCD(0,1,"  X1   Y1   X2   Y2");
+	printLCD(0,3,TEXT12);
+	Aff_Test_Fdc ();
+ 	while (digitalRead (PIN_BP_HOMING)== HIGH); //alarmSonor();  
+    SoundAlarm(OFF);
+	while (digitalRead (PIN_BP_HOMING)== LOW);
     
-  lcd.clear();
-  testPosIntDem();
-  lcd.clear();
-  	lcd.setCursor(0, 0);
-  	lcd.print(MachineName);
-  	lcd.setCursor(0, 1);
-  	lcd.print("MODE E MOT WIRE  CUT");
-  	lcd.setCursor(0, 3);
-  	lcd.print("             0%   0%");
+	clearLCD();
+	testPosIntDem();
+	clearLCD();
+	printLCD(0,0,MachineName);
+	printLCD(0,1,"MODE E MOT WIRE  CUT");
+	printLCD(0,3,"             0%   0%");
 }
+
+  
 //------------------------------------------------------------------------------
 
 //==============================================================================
@@ -987,47 +950,28 @@ void Trait_Arr_fdc()
 
 void testPosIntDem()
 {
-  lcd.setCursor(0, 2);
-  lcd.print(TEXT6); // "Test des inter."
+	printLCD(0,2,TEXT6);
   if (digitalRead (PIN_SWITCH_CONTROL_MODE) == LOW) // test si l'inter Mode est sur Manu
   {
-    lcd.setCursor(0, 3);
-    lcd.print(TEXT7);// "Mettre Mode en manu" attente inter Mode sur Manu
-    do
-    {
-
-    } 
+	printLCD(0,3,TEXT7);
     while (digitalRead (PIN_SWITCH_CONTROL_MODE) == LOW);
   }
 
   if (digitalRead (PIN_SWITCH_MOTOR) == LOW) // test si l'inter Moteur est sur OFF
   {
-    lcd.setCursor(0, 3);
-    lcd.print(TEXT8); // "Mettre Mot. sur OFF" attente inter Moteur sur OFF
-    do
-    {
-
-    } while (digitalRead (PIN_SWITCH_MOTOR) == LOW);
+	printLCD(0,3,TEXT8); // "Mettre Mot. sur OFF" attente inter Moteur sur OFF
+	while (digitalRead (PIN_SWITCH_MOTOR) == LOW);
   }
   if ((digitalRead (PIN_SWITCH_HEATING_PC == LOW) | (digitalRead (PIN_SWITCH_HEATING_MANU) == LOW))) // test si l'inter Chauffe est sur OFF
   {
-    lcd.setCursor(0, 3);
-    lcd.print(TEXT9); // "Mettre Chauf sur OFF" attente inter Chauffe sur OFF
-    do
-    {
-
-    } while ((digitalRead (PIN_SWITCH_HEATING_PC) == LOW) | (digitalRead (PIN_SWITCH_HEATING_MANU) == LOW));
-
+	printLCD(0,3,TEXT9);
+	while ((digitalRead (PIN_SWITCH_HEATING_PC) == LOW) | (digitalRead (PIN_SWITCH_HEATING_MANU) == LOW));
   }
 
   if (digitalRead (PIN_SWITCH_HEATING_CUTTER) == LOW) // test si l'inter Moteur est sur OFF
   {
-    lcd.setCursor(0, 3);
-    lcd.print(TEXT10); // "Mettre Cut sur OFF" attente inter Moteur sur OFF
-    do
-    {
-
-    } while (digitalRead (PIN_SWITCH_HEATING_CUTTER) == LOW);
+	printLCD(0,3,TEXT10); // "Mettre Cut sur OFF" attente inter Moteur sur OFF
+	while (digitalRead (PIN_SWITCH_HEATING_CUTTER) == LOW);
   }
 
 
@@ -1045,22 +989,19 @@ inline void PauseManage (void)
   {
     if ( millis() > Cad_Aff)
     {
-    RePause = (kPause - millis())/1000 ;
-    Cad_Aff = millis() + 250;
-    lcd.setCursor(7, 0);
-  	lcd.print ("   ") ;
-  	lcd.setCursor(7, 0);
-    lcd.print (RePause) ;
+		RePause = (kPause - millis())/1000 ;
+		Cad_Aff = millis() + 250;
+
+			printLCD(7,0,"   ");
+			printLCD(7,0,RePause);
     }
     
     if ( millis() > kPause)
     {
     ActivePause = 0 ;
     kPause = 0;
-    lcd.setCursor(0, 0);
-	  lcd.print ("                   ") ;
-   	lcd.setCursor(0, 0);
-	  lcd.print(MachineName);
+	printLCD(0,0,"                   ");
+	printLCD(0,0,MachineName);
     ENABLE_T5_ISR();
     }
   }
@@ -1102,7 +1043,7 @@ inline void ProcessStep(byte cmd)
 
   if (CHAUFFE_ASSERV == 1)
   {
-    WireVitesse = ((cmd & DRIVER_X1_STEP_MASK)&&(cmd & DRIVER_Y1_STEP_MASK)||(cmd & DRIVER_X2_STEP_MASK) && (cmd & DRIVER_Y2_STEP_MASK) );
+    WireVitesse = (((cmd & DRIVER_X1_STEP_MASK)&&(cmd & DRIVER_Y1_STEP_MASK))||((cmd & DRIVER_X2_STEP_MASK) && (cmd & DRIVER_Y2_STEP_MASK)));
   }
 //	delayMicroseconds(3); 		// wait 3 us before sending falling pulse for step
 	StepperDriverStep(0);
@@ -1175,9 +1116,9 @@ inline void HeatingRelay (byte en)
 
 inline void ComputeRotaryEncoderHeatConsign (void)
 {
-	bool rotEncA, rotEncB;
+/*	bool rotEncA, rotEncB;
 	byte rotStatus = 0;
-/*
+
 	if(!digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON))
 	{
 		while(digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON));
@@ -1341,24 +1282,24 @@ inline void ProcessCommand (void)
 			break;
       
       case 'P':   // Pause
-      DISABLE_T5_ISR();
-      ActivePause = 1;
+			DISABLE_T5_ISR();
+			ActivePause = 1;
 			PC.Pause = CommandBuffer[CommandIndexRead].Data.ui16;
-     /*unsigned int H_Pause = 0;
-      unsigned int L_Pause = 0;
-      H_Pause = PC.Pause;
-      L_Pause = PC.Pause;
-       H_Pause << 8 ;
-       L_Pause >> 8 ;
-       PC.Pause = H_Pause | L_Pause ;
-       */
-      kPause = 0;
-    	kPause = millis() + PC.Pause;
-      Cad_Aff = millis() + 250;
-      lcd.setCursor(0, 0);
-    	lcd.print ("Pause      secondes ") ;
-    	lcd.setCursor(7, 0);
-      lcd.print (PC.Pause /1000) ;
+			/*unsigned int H_Pause = 0;
+			unsigned int L_Pause = 0;
+			H_Pause = PC.Pause;
+			L_Pause = PC.Pause;
+			H_Pause << 8 ;
+			L_Pause >> 8 ;
+			PC.Pause = H_Pause | L_Pause ;
+			*/
+			kPause = 0;
+			kPause = millis() + PC.Pause;
+			Cad_Aff = millis() + 250;
+
+			printLCD(0,0,"Pause      secondes ");
+			printLCD(7,0,PC.Pause /1000);
+		   
 			break;
 
 		case 'H':   // Wire Heat ON/OFF (may be programmed as PWM (analog out))
@@ -1612,43 +1553,95 @@ void GetSwitchStatus (void)
 
 /*********************************************************************************/
 
+void matrixPrint (uint8_t col, uint8_t row, const char *s)
+{
+	col = (col * WIDTH_FONT) + WIDTH_FONT;
+	row = (row * HEIGH_FONT) + HEIGH_FONT;
+
+  u8g.firstPage();
+  do {
+    u8g.setFont(u8g_font_6x13);
+    u8g.drawStr(col, row, s);
+  } while( u8g.nextPage() );
+}
+
+/*********************************************************************************/
+
+void matrixClear(){
+    u8g.firstPage(); 
+    do {
+    } while( u8g.nextPage() );
+}
+
+/*********************************************************************************/
+
+void printLCD(uint8_t col, uint8_t row, const char *s)
+{
+	#ifdef MATRIX_LCD
+		matrixPrint(col,row,s);
+	#else
+		lcd.setCursor(col, row);
+		lcd.print(s);
+	#endif 
+}
+
+/*********************************************************************************/
+
+void printLCD(uint8_t col, uint8_t row, const String s)
+{
+	#ifdef MATRIX_LCD
+		matrixPrint(col,row,s.c_str());
+	#else
+		lcd.setCursor(col, row);
+		lcd.print(s.c_str());
+	#endif 
+}
+
+/*********************************************************************************/
+
+void clearLCD()
+{
+	#ifdef MATRIX_LCD
+		matrixClear();
+	#else
+		lcd.clear();
+	#endif 
+}
+
+/*********************************************************************************/
+
 void HMI_WriteModeManu (void)
 {
-	lcd.setCursor(0, 2);
-	lcd.print("MANU ");
-	lcd.setCursor(0, 3);
-	lcd.print("          ");
+		printLCD(0,2,"MANU ");
+		printLCD(0,3,"          ");
  }
 
 /*********************************************************************************/
 
 void HMI_WriteModePC (void)
 {
-	lcd.setCursor(0, 2);
-	lcd.print(" PC  I  ON  PC   OFF");
-	lcd.setCursor(6, 3);
-	lcd.print("mm/s");
+	printLCD(0, 2, " PC  I  ON  PC   OFF");
+	printLCD(6, 3, "mm/s");
 }
 
 /*********************************************************************************/
 
 inline void HMI_InitScreen (void)
 {
-	// Welcome text
+	// Welcome text	
 	lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
-	lcd.print(" Jedicut-Alden-USB");
-	lcd.setCursor(7, 1);
-	lcd.print(Version);
-	lcd.setCursor(7, 2);
-	lcd.print(BAUDRATE);
-	lcd.setCursor(5, 3);
+	printLCD(0, 0, " Jedicut-Alden-USB");
+	printLCD(7, 1, Version);
+	printLCD(7, 2, BAUDRATE);
+
+	
 #ifdef BUZZER_ON
-	lcd.print("BUZZER ON");
+	printLCD(5, 3, BUZZ_ON);
 	SoundAlarm(ON);
 	delay(500);
 	SoundAlarm(OFF);
 #else
-	lcd.print("BUZZER OFF");
+	printLCD(5, 3, BUZZ_OFF);
 #endif
 }
 
@@ -1656,18 +1649,14 @@ inline void HMI_InitScreen (void)
 
 inline void HMI_ParamsScreen (void)
 {
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print("mm/step " + String(MM_PER_STEP, 5));
-	lcd.setCursor(0, 1);
-	lcd.print (TEXT1 + String(MAX_PERCENTAGE_WIRE, DEC) + "%");
-	lcd.setCursor(0, 2);
-	lcd.print (TEXT2 + String(MAX_PERCENTAGE_CUTTER, DEC) + "%");
-	lcd.setCursor(0, 3);
+	clearLCD();
+	printLCD(0, 0,"mm/step " + String(MM_PER_STEP, 5));
+	printLCD (0, 1, TEXT1 + String(MAX_PERCENTAGE_WIRE, DEC) + "%");
+	printLCD (0, 2, TEXT2 + String(MAX_PERCENTAGE_CUTTER, DEC) + "%");
 	#ifdef HEAT_CONSIGN_ROTARY_ENCODER
-	lcd.print(TEXT4);
+	printLCD(0, 3, TEXT4);
 	#else
-	lcd.print(TEXT3);
+	printLCD(0, 3, TEXT3);
 	#endif
 }
 
@@ -1675,9 +1664,8 @@ inline void HMI_ParamsScreen (void)
 
 inline void HMI_InitSwitchScreen (void)
 {
-	lcd.clear();
-	lcd.setCursor(0, 1);
-	lcd.print(TEXT6);
+	clearLCD();
+	printLCD(0, 1, TEXT6);
 }
 
 /*********************************************************************************/
@@ -1695,30 +1683,23 @@ inline bool HMI_SwitchInitScreen (void)
 	{
 		if(old != status)
 		{
-
-			lcd.setCursor(0, 2);
 			if(!Switch.ControlMode) // test si l'inter Mode est sur Manu
-				lcd.print(TEXT7);// attente inter Mode sur Manu
+				printLCD(0, 2, TEXT7); // attente inter Mode sur Manu
 			else if(!Switch.MotorEnable)
-				lcd.print(TEXT8); // attente inter Moteur sur OFF
+				printLCD(0, 2, TEXT8); // attente inter Moteur sur OFF
 			else if(!Switch.HeatPC || !Switch.HeatManu)
-				lcd.print(TEXT9); // attente inter Chauffe sur OFF
+				printLCD(0, 2, TEXT9); // attente inter Chauffe sur OFF
 			else if(!Switch.CutterEnable)
-				lcd.print(TEXT10); // attente inter Moteur sur OFF
-
+				printLCD(0, 2, TEXT10); // attente inter Moteur sur OFF
 			old = status;
 		}
-
 		return false;
 	}
 
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print(MachineName);
-	lcd.setCursor(0, 1);
-	lcd.print("MODE E MOT WIRE  CUT");
-	lcd.setCursor(0, 3);
-	lcd.print("             0%   0%");
+	clearLCD();
+	printLCD(0, 0, MachineName);	
+	printLCD(0, 1, "MODE E MOT WIRE  CUT");	
+	printLCD(0, 3, "             0%   0%");
 
 #ifdef DEBUG
 	digitalWrite(13, LOW);
@@ -1838,9 +1819,8 @@ inline void HMI_ModeScreen (void)
 			SoundAlarm(OFF);
 			line[5] = 'I';
 		}
-
-		lcd.setCursor(0, 2);
-		lcd.print(line);
+		
+		printLCD(0, 2, line);
 
 		HMI.ProcessDigit = true;
 
@@ -1866,9 +1846,8 @@ inline void HMI_ManuDigitScreen (void)
 		line[16] = HMI.CutterConsign >= 100 ? ('0' + (HMI.CutterConsign/100)) : ' ';
 		line[17] = HMI.CutterConsign >= 10 ? ('0' + ((HMI.CutterConsign/10)%10)) : ' ';
 		line[18] = '0' + (HMI.CutterConsign % 10);
-
-		lcd.setCursor(0, 3);
-		lcd.print(line);
+		
+		printLCD(0, 3, line);
 		HMI.ProcessDigit = false;
 	}
 }
@@ -1903,8 +1882,7 @@ inline void HMI_PcDigitScreen (void)
 		line[12] = HMI.WireConsign >= 10 ? ('0' + ((HMI.WireConsign/10)%10)) : ' ';
 		line[13] = '0' + (HMI.WireConsign % 10);
 
-		lcd.setCursor(0, 3);
-		lcd.print(line);
+		printLCD(0, 3, line);
 		HMI.ProcessDigit = false;
 	}
 }
@@ -1969,6 +1947,7 @@ inline void HMI_Manage (void)
 				HMI.State = HMI_MODE_SCREEN;
 			break;
 	}
+	
 }
 
 /*********************************************************************************/

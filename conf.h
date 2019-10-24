@@ -12,6 +12,9 @@
 #define LANG_FRENCH
 //#define LANG_ENGLISH
 
+#define MATRIX_LCD
+//#define CRYSTAL_LCD
+
 // millimeter per Step
 // Example 1: Stepper Driver setting: Full Step, Stepper Motor: 400 steps per revolution, M6 Lead screw: 1mm thread => (mm per revolution * driver setting) / step per revolution = (1*1)/400 = 0.0025
 // Ecxample 2: Stepper Driver Setting: 1/8 Step, Stepper Motor: 200 steps per revolution, Belt: 2mm between teeth, Pulley: 20 teeth => (Pulley teeth * Belt teeth interspace * driver setting) / step per revolution = (20*2*1/8)/200 = 0.025

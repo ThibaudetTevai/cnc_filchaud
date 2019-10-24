@@ -46,24 +46,13 @@
 
 U8GLIB_ST7920_128X64_1X u8g(23, 17, 16); // SPI Com: SCK = en = 23, MOSI = rw = 17, CS = di = 16  RepRap Discount Full Graphic Smart Controller - RAMPS
 
-void draw(const char * txt, int i) {
- u8g.firstPage();  
-      do {
-        u8g.setFont(u8g_font_6x13);
-        u8g.drawStr( 0+i, 13, txt);
-      } while( u8g.nextPage() );
-}
-
 void matrixPrint (uint8_t col, uint8_t row, const char *s)
 {
-	col = (col * WIDTH_FONT) + WIDTH_FONT;
-	row = (row * HEIGH_FONT) + HEIGH_FONT;
-
-  u8g.firstPage();
-  do {
-    u8g.setFont(u8g_font_6x13);
-    u8g.drawStr(col, row, s);
-  } while( u8g.nextPage() );
+col = (col * WIDTH_FONT);
+row = (row * HEIGH_FONT) + HEIGH_FONT;
+u8g.setFont(u8g_font_6x13);
+u8g.setPrintPos( col, row);
+u8g.print(s);
 }
 
 void setup(void) {
@@ -75,10 +64,12 @@ void loop(void) {
   int i;  
   for (i=0; i < COUNT; i++)
     {  
-
-      matrixPrint(0,0,"SUCE");
-      delay(1000);
+  u8g.firstPage();
+  do {
+      matrixPrint(1,0,"SUCE");
       matrixPrint(0,1,"TOI");
-      delay(1000);
+      matrixPrint(2,2,"LA");
+      matrixPrint(3,3,"BAS");
+  } while( u8g.nextPage() );
     }
 }

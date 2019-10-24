@@ -1555,14 +1555,11 @@ void GetSwitchStatus (void)
 
 void matrixPrint (uint8_t col, uint8_t row, const char *s)
 {
-	col = (col * WIDTH_FONT) + WIDTH_FONT;
-	row = (row * HEIGH_FONT) + HEIGH_FONT;
-
-  u8g.firstPage();
-  do {
-    u8g.setFont(u8g_font_6x13);
-    u8g.drawStr(col, row, s);
-  } while( u8g.nextPage() );
+col = (col * WIDTH_FONT);
+row = (row * HEIGH_FONT) + HEIGH_FONT;
+u8g.setFont(u8g_font_6x13);
+u8g.setPrintPos( col, row);
+u8g.print(s);
 }
 
 /*********************************************************************************/
@@ -2010,10 +2007,13 @@ inline void ModeManage (void)
 /**********************************************************************************/
 void loop (void)
 {
-	GetSwitchStatus();
-	StepperDriverManage();
-  PauseManage(); 
-	ModeManage();
-	HMI_Manage();
+	
+	u8g.firstPage();
+	do {
+		GetSwitchStatus();
+		StepperDriverManage();
+		PauseManage(); 
+		ModeManage();
+		HMI_Manage();
+	} while( u8g.nextPage() );
 }
-

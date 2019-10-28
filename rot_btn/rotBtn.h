@@ -1,18 +1,17 @@
 #include <Bounce2.h>
-#include "rotBtn.h"
 
 #ifndef ROTBTN_H_
 #define ROTBTN_H_
 
-void   setupBtn(byte pinA, byte pinb, byte pinPush) 
-void  rotBtnRefresh();
+void  	setupBtn(byte, byte, byte);
+void  	rotBtnRefresh();
 
-bool  getPushedStatus();
-bool  getCntUpdated();
+bool  	getPushedStatus();
+bool  	getCntUpdated();
 uint8_t getValueRot();
 
-void  doDebounce();
-void  doEncoderRead();
-void  doUpdateCounter();
+void  	doDebounce();
+void  	doEncoderRead();
+void  	doUpdateCounter();
 
 #endif

@@ -1,85 +1,82 @@
 #include <Bounce2.h>
 
-/* 
- DESCRIPTION
- ====================
- Reads the 2 switches in an encoder, 
- determines direction,
- updates counter.
- No interrupts.
- Switches debounced, didn't test first, just did it anyway.
- Pushing the knob in, resuses A and B as D and E
- D is paired with A; E with B
- */
-
-const byte ENCODER_PINA= 33;  //A&C
-const byte ENCODER_PINB= 31; //B&D
-const byte SWITCH_PIN= 35;
-
 bool valueA;
 bool valueB;
-bool btnPressed = false;
-bool motionDetected = false;
+bool btnPressed;
+bool motionDetected;
+bool cntUpdated;
 bool CW;
 
-// not pressed
-int grossCounter = 0; // total steps
-int nettCounter = 0;  // cw-ccw
+Bounce debouncerA;
+Bounce debouncerB;
+Bounce debouncerSWITCH;
 
-// pressed; suffix P
-int grossCounterP = 0; // total steps
-int nettCounterP = 0;  // cw-ccw
-
-// Instantiate 2 Bounce object
-Bounce debouncerA = Bounce(); 
-Bounce debouncerB = Bounce(); 
-Bounce debouncerSWITCH = Bounce();
+int nettCounter = 0;
 
 void setup() {
-  setupBtn();
+  setupBtn(31, 33, 35 );
 }
 void loop(){
+  if(isUpdated()){    
+      Serial.println(getPushedStatus());
+      Serial.println(getValueRot());
+  }
   rotBtnRefresh();  
 }
 
 void rotBtnRefresh() {
-  // Update the debouncers
   doDebounce();
-  // Read the encoder switches
   doEncoderRead();
-  //determine direction and update counter
   updateCounter();
 }
 
 bool getPushedStatus(){
-  return !btnPressed;
+  return btnPressed;
 }
 
 int getValueRot(){
   return nettCounter;
 }
 
-
-void setupBtn() {
-  Serial.begin(115200);
-  Serial.println("Setup");
-  // Setup the buttons
-  pinMode(ENCODER_PINA,INPUT_PULLUP);
-  pinMode(ENCODER_PINB,INPUT_PULLUP);
-  pinMode(SWITCH_PIN,INPUT_PULLUP);
-
-  // After setting up the button, setup debouncer
-  debouncerA.attach(ENCODER_PINA);
-  debouncerA.interval(5);
-  debouncerB.attach(ENCODER_PINB);
-  debouncerB.interval(5);
-  debouncerSWITCH.attach(SWITCH_PIN);
-  debouncerSWITCH.interval(5);
-  Serial.println("Setup done");
-  Serial.println();
+bool isUpdated(){
+  if(cntUpdated){
+    cntUpdated = false;
+    return true;
+  }
+  return false;
 }
 
-// my functions **************************************************
+void setupBtn(byte pinA, byte pinB, byte pinBtnSwitch) {
+  Serial.begin(115200);
+  Serial.println("Setup");
+
+  // Flag
+  btnPressed = false;
+  motionDetected = false;
+  cntUpdated = false;
+
+  // Counter
+  nettCounter = 0;
+  
+  // Instantiate 2 Bounce object
+  debouncerA = Bounce(); 
+  debouncerB = Bounce(); 
+  debouncerSWITCH = Bounce();
+
+  // Setup the buttons
+  pinMode(pinA,INPUT_PULLUP);
+  pinMode(pinB,INPUT_PULLUP);
+  pinMode(pinBtnSwitch,INPUT_PULLUP);
+  
+  // After setting up the button, setup debouncer
+  debouncerA.attach(pinA);
+  debouncerA.interval(5);
+  debouncerB.attach(pinB);
+  debouncerB.interval(5);
+  debouncerSWITCH.attach(pinBtnSwitch);
+  debouncerSWITCH.interval(5);
+}
+
 void doDebounce(){
   debouncerA.update();
   debouncerB.update();
@@ -90,26 +87,20 @@ void doEncoderRead(){
   valueA = debouncerA.read();
   valueB = debouncerB.read();
   btnPressed = !debouncerSWITCH.read();
-} //doEncoderRead
+}
 
 void updateCounter(){
-    if (valueA && valueB && motionDetected ) //in a detent and just arrived
-    {
+    if (valueA && valueB && motionDetected ){ //in a detent and just arrived
       if (CW) nettCounter++; //cw +ve
       else nettCounter--; //ccw -ve
       motionDetected = false;
-      Serial.println("Pressed");
-      Serial.println(nettCounter);
+      cntUpdated = true;
     }
 
-    if (valueA && !valueB && !motionDetected ){ // just started CW
-      CW= true;
-      motionDetected=true;
-    }
-
-    if (!valueA && valueB && !motionDetected )  //just started CCW
-    {
-      CW= false;
-      motionDetected=true;
-    }
-} //updateCounter
+    if(!motionDetected) {
+      if (valueA ^ valueB){ // valueA XOR valueB
+         CW = (valueA) ? false : true; // Define if CW or CCW
+         motionDetected=true; // just started CW  
+      } 
+    }    
+}

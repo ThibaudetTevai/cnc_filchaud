@@ -20,13 +20,14 @@ void loop(void) {
     lcdMatrix.printLcd(0, 3, "nbvcxwmlkjhg987654321");
     lcdMatrix.printLcd(0, 4, "NBVCXWMLKJHG123456789");
     lcdMatrix.printMatrix();
-    delay(1000);
-    lcdMatrix.clearLcd();
-    delay(1000);
+    delay(1000); 
+    lcdMatrix.clearLcd();    
+    lcdMatrix.printLcd(0, 0, "azertyuiopqsdfghjklmw");
+    lcdMatrix.printLcd(0, 1, "AZERTYUIOPQSDFGHJKLMW");
     lcdMatrix.printLcd(0, 2, "For that you will ");
     lcdMatrix.printLcd(0, 3, "nbvcxwmlkjhg987654321");
+    lcdMatrix.printLcd(0, 4, "NBVCXWMLKJHG123456789");
     lcdMatrix.printMatrix();
     delay(1000); 
     lcdMatrix.clearLcd();
-    delay(1000); 
 }

@@ -1,32 +1,37 @@
 #include "U8glib.h"
 #include "lcdMatrix.h"
+#include "rotBtn.h"
 #include <SoftwareSerial.h>
+
+#define PINA 31
+#define PINB 33
+#define PINS 35
 
 SoftwareSerial mySerial(2, 3); // RX, TX
 LcdMatrix lcdMatrix;
 
+RotBtn rotBtn(PINA,PINB,PINS);
+
+char bufferItoa[4]; 
+
 void setup(void) {
-    ///u8g.setFont(u8g_font_6x13);
     Serial.begin(115200);
     while (!Serial);
     Serial.println("start");
     lcdMatrix.setup(Serial);
+    lcdMatrix.printLcd(0, 1, "       Compteur      ");
+    lcdMatrix.printLcd(0, 2, itoa(rotBtn.getValueRot(),bufferItoa,10));
+    lcdMatrix.printMatrix();
 }
 
 void loop(void) {
-    lcdMatrix.printLcd(0, 0, "azertyuiopqsdfghjklmw");
-    lcdMatrix.printLcd(0, 1, "AZERTYUIOPQSDFGHJKLMW");
-    lcdMatrix.printLcd(0, 2, "123456789NBVCXWMLKJHG");
-    lcdMatrix.printLcd(0, 3, "nbvcxwmlkjhg987654321");
-    lcdMatrix.printLcd(0, 4, "NBVCXWMLKJHG123456789");
-    lcdMatrix.printMatrix();
-    delay(1000);
+  if(rotBtn.isCntUpdated()){
+      Serial.println(itoa(rotBtn.getValueRot(),bufferItoa,10));
+      lcdMatrix.printLcd(rotBtn.getValueRot(), 2, itoa(rotBtn.getValueRot(),bufferItoa,10));
+      lcdMatrix.printMatrix();
+  }
+  if(rotBtn.isBtnPushed()) {
     lcdMatrix.clearLcd();
-    delay(1000);
-    lcdMatrix.printLcd(0, 2, "For that you will ");
-    lcdMatrix.printLcd(0, 3, "nbvcxwmlkjhg987654321");
-    lcdMatrix.printMatrix();
-    delay(1000); 
-    lcdMatrix.clearLcd();
-    delay(1000); 
+  }
+  rotBtn.rotBtnRefresh();  
 }

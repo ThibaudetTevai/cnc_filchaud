@@ -37,10 +37,14 @@ void LcdMatrix::printMatrix() {
     } while (this->ptrU8g->nextPage());
 }
 
-void LcdMatrix::printLcd(uint8_t col, uint8_t row, const char * s) {
+void LcdMatrix::printLcd(uint8_t col, uint8_t row, char * s) {
     uint8_t startPos = col + (row * this->NB_COL);
     uint8_t i = 0;
-    
+    printer->print(col);
+    printer->print(" ");
+    printer->print(row);
+    printer->print(" ");
+    printer->println(s);
     if (startPos > (((this->NB_COL) * (this->NB_ROW)) - 1))return;
     while (s[i] != '\0' && i <= this->NB_COL) {
         this->screenContent[startPos + i] = s[i++];
@@ -50,6 +54,6 @@ void LcdMatrix::printLcd(uint8_t col, uint8_t row, const char * s) {
 void LcdMatrix::clearLcd() {
     this->ptrU8g->firstPage();
     memset( this->screenContent,' ' , this->NB_ROW * this->NB_COL );
-    //for (uint8_t i = 0; i<(this->NB_ROW * this->NB_COL); i++) Serial.println(*(this->screenContent+i));
+    //for (uint8_t i = 0; i<(this->NB_ROW * this->NB_COL); i++) printer->println(*(this->screenContent+i));
     do {} while (this->ptrU8g->nextPage());
 }

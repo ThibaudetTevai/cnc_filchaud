@@ -18,7 +18,7 @@ class LcdMatrix{
     LcdMatrix ();
     void setup(HardwareSerial &print );
     void printMatrix();
-    void printLcd(uint8_t, uint8_t, const char*);
+    void printLcd(uint8_t, uint8_t, char*);
     void clearLcd();
   private:
     void setParameter();

@@ -3,7 +3,7 @@
 #include <SoftwareSerial.h>
 
 #define PINA 31
-#define PINB 32
+#define PINB 33
 #define PINS 35
 
 SoftwareSerial mySerial(2, 3); // RX, TX
@@ -17,8 +17,8 @@ void setup(void) {
 }
 
 void loop(void) { 
-  if(rotBtn.isUpdated()){    
-      Serial.println(rotBtn.getPushedStatus());
+  if(rotBtn.isCntUpdated()){    
+      Serial.println(rotBtn.getValueBtn());
       Serial.println(rotBtn.getValueRot());
   }
   rotBtn.rotBtnRefresh();  

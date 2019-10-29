@@ -13,6 +13,9 @@
 //#define LANG_ENGLISH
 
 #define MATRIX_LCD
+#define PINA_MAT 31
+#define PINB_MAT 33
+#define PINS_MAT 35
 //#define CRYSTAL_LCD
 
 // millimeter per Step
@@ -32,7 +35,7 @@
 #define HEAT_CONSIGN_POTENTIOMETER
 
 // Mettre ON_BUZZER "1" pour Alarme sonore fin de course,"0" pas d'alarme sonore
-#define BUZZER_ON
+#define BUZZER_ON 0
 
 
 /*=============================================================================
@@ -98,11 +101,11 @@ Ces paramètres déterminent les différents types de séquence Homing
 //#define INVERT_STEPPER_DRIVER_ENABLE_PIN
 
 #ifdef INVERT_STEPPER_DRIVER_ENABLE_PIN
-	#define	STEPPER_DRIVER_ENABLE_HIGH_LEVEL 1
-	#define	STEPPER_DRIVER_ENABLE_LOW_LEVEL 0
+  #define STEPPER_DRIVER_ENABLE_HIGH_LEVEL 1
+  #define STEPPER_DRIVER_ENABLE_LOW_LEVEL 0
 #else
-	#define	STEPPER_DRIVER_ENABLE_HIGH_LEVEL 0
-	#define	STEPPER_DRIVER_ENABLE_LOW_LEVEL 1
+  #define STEPPER_DRIVER_ENABLE_HIGH_LEVEL 0
+  #define STEPPER_DRIVER_ENABLE_LOW_LEVEL 1
 #endif
 
 /*==============================================================================

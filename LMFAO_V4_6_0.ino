@@ -67,11 +67,13 @@
 #include <avr/io.h>
 #include <avr/iom2560.h>
 #include <LiquidCrystal.h>
-#include "U8glib.h"
+#include <SoftwareSerial.h>
 
 /* Internal header */
 #include "conf.h"
 #include "lang.h"
+#include "lcdMatrix.h"
+#include "rotBtn.h"
 
 
 /* DEFINE */
@@ -94,14 +96,10 @@
   #error "Missing or invalide Baudrate value in Conf.h" // Baud rate value configured with wrong value or missing declaration in Conf.h
 #endif
 
-
-
-
 #define PIN_DEBUG1 13
 #define PIN_DEBUG2 19
 #define PIN_DEBUG3 6
 #define PIN_DEBUG4 7
-
 
 // stepper driver
 #define DRIVER_X1_DIR_MASK 0x10     // Direction mask
@@ -240,19 +238,13 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 #define HIGH_BYTE 1
 #define LOW_BYTE 0
 
-
-#define ENABLE_RX_ISR() UCSR0B |= 0x90
 #define ENABLE_T1_ISR() TIMSK1 = 0x02
 #define ENABLE_T5_ISR() TIMSK5 = 0x02
 #define ENABLE_T2_ISR() TIMSK2 = 0x02
 
-#define DISABLE_RX_ISR() UCSR0B &= 0x6F
 #define DISABLE_T1_ISR() TIMSK1 = 0x00
 #define DISABLE_T5_ISR() TIMSK5 = 0x00
 #define DISABLE_T2_ISR() TIMSK2 = 0x00
-
-#define TX_WRITE(x) UDR0 = x
-#define RX_READ(x) x = UDR0
 
 #define ENABLE_T2_COMP_OUTPUT_B() TCCR2A |= 0x20
 #define DISABLE_T2_COMP_OUTPUT_B() TCCR2A &= 0xCF
@@ -261,8 +253,8 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 
 //MATRIX declaration
   U8GLIB_ST7920_128X64_1X u8g(23, 17, 16); // SPI Com: SCK = en = 23, MOSI = rw = 17, CS = di = 16  RepRap Discount Full Graphic Smart Controller - RAMPS
-  #define WIDTH_FONT 6
-  #define HEIGH_FONT 13
+  LcdMatrix lcdMatrix;
+  RotBtn rotBtn(PINA_MAT,PINB_MAT,PINS_MAT);
   
 //LCD declaration
   LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -366,9 +358,9 @@ struct StructHMI
 } HMI;
 
 #ifdef MACHINE_NAME
-  const String MachineName = String(MACHINE_NAME);
+  const char* MachineName = String(MACHINE_NAME).c_str();
 #else
-  const String MachineName = " JediCut-Alden USB";
+  const char* MachineName = " JediCut-Alden USB";
 #endif
 
 unsigned char MachineNameChar[LCD_COLUMN_COUNT];
@@ -397,6 +389,7 @@ struct StructSwitch
 } Switch;
 
 volatile bool buzzerToogle = false;
+static byte modeState;
 
 // Pour Homing
 
@@ -418,21 +411,16 @@ unsigned long Cad_Aff = 0;  //cadense affichage pause
   int maRaz ; 
   int maPreset ;
 
-const String Version = VERSION;
-
 /**********************************************************************************/
 void setup (void)
 {
   //serial com Initialization
-
-  UBRR0 = UBRR0_BAUDRATE_VALUE;   // Configure USART Clock register
-  UCSR0A = 0x02;          //
-  UCSR0B = 0x18;          //
-  UCSR0C = 0x06;          //
-
+  Serial.begin(115200);
+  while (!Serial);
   // pins Initialization
 
   //LCD
+  lcdMatrix.setup(Serial);
   pinMode(PIN_ROTARY_ENCODER_PUSHBUTTON, INPUT);
   digitalWrite(PIN_ROTARY_ENCODER_PUSHBUTTON, HIGH);
 
@@ -562,7 +550,7 @@ void setup (void)
   OCR5A = 255;  // Set Top value => Fosc = 16MHz (62.5 ns), Prescaler = 256, Compare value = 255 -> Fpwm = 1 / (255 * 256 * 62.5e-9) =  245 Hz
 
   //
-  MachineName.getBytes(MachineNameChar, LCD_COLUMN_COUNT);
+  //MachineName.getBytes(MachineNameChar, LCD_COLUMN_COUNT);
  // Switch.HomingOk = false ;  // Etat du Homing
   #ifdef DEBUG
   digitalWrite(13, HIGH);
@@ -570,6 +558,7 @@ void setup (void)
   //Al>
   AideMiseServiceFdc(); // aide à la mise en service des fins de course
   //<
+  Serial.println("Setup Ended");
 }
 
 //==============================================================================
@@ -1002,7 +991,7 @@ inline void PauseManage (void)
     ActivePause = 0 ;
     kPause = 0;
   printLCD(0,0,"                   ");
-  printLCD(0,0,MachineName);
+  //printLCD(0,0,MachineName);
     ENABLE_T5_ISR();
     }
   }
@@ -1353,11 +1342,17 @@ ISR(TIMER5_COMPA_vect)
 
 /**********************************************************************************/
 
-ISR(USART0_RX_vect)
+/*ISR(USART0_RX_vect)
 {
   digitalWrite(PIN_DEBUG4, HIGH);
   ComParse();
   digitalWrite(PIN_DEBUG4, LOW);
+}*/
+
+void serialEvent() {
+  while (Serial.available()) {
+    if( modeState == MODE_PC) ComParse((char)Serial.read());
+  }
 }
 
 
@@ -1367,7 +1362,7 @@ void BufferFlush (void)
 {
   CommandCounter = 0;
   ComOverflow = false;
-  TX_WRITE('C');
+  Serial.println('C');
   CommandIndexRead = 0;
   CommandIndexWrite = 0;
   ParserState = PARSER_STATE_CMD;
@@ -1394,7 +1389,7 @@ inline void CheckComBufferOverflow (void)
   {
     ComOverflow = true;
     digitalWrite(PIN_DEBUG2, HIGH);
-    TX_WRITE('S');
+    Serial.println('S');
   }
 }
 
@@ -1406,7 +1401,7 @@ inline void CheckComBufferUnderflow (void)
   {
     ComOverflow = false;
     digitalWrite(PIN_DEBUG2, LOW);
-    TX_WRITE('C');
+    Serial.println('C');
   }
 }
 
@@ -1472,14 +1467,11 @@ inline void DataProcess (unsigned char *data)
 
 /**********************************************************************************/
 
-inline void ComParse (void)
+inline void ComParse (unsigned char data)
 {
   static byte i = 0;
   static unsigned char Cmd[CMD_DATA_SIZE];
   static byte CmdSize = 0;
-  unsigned char data;
-
-  RX_READ(data);
 
   switch (ParserState)
   {
@@ -1554,29 +1546,11 @@ void GetSwitchStatus (void)
 
 /*********************************************************************************/
 
-void matrixPrint (uint8_t col, uint8_t row, const char *s)
-{
-col = (col * WIDTH_FONT);
-row = (row * HEIGH_FONT) + HEIGH_FONT;
-u8g.setFont(u8g_font_6x13);
-u8g.setPrintPos( col, row);
-u8g.print(s);
-}
-
-/*********************************************************************************/
-
-void matrixClear(){
-    u8g.firstPage(); 
-    do {
-    } while( u8g.nextPage() );
-}
-
-/*********************************************************************************/
-
-void printLCD(uint8_t col, uint8_t row, const char *s)
+void printLCD(uint8_t col, uint8_t row,const char *s)
 {
   #ifdef MATRIX_LCD
-    matrixPrint(col,row,s);
+    Serial.println(s);
+    lcdMatrix.printLcd(col, row, s);
   #else
     lcd.setCursor(col, row);
     lcd.print(s);
@@ -1585,22 +1559,10 @@ void printLCD(uint8_t col, uint8_t row, const char *s)
 
 /*********************************************************************************/
 
-void printLCD(uint8_t col, uint8_t row, const String s)
-{
-  #ifdef MATRIX_LCD
-    matrixPrint(col,row,s.c_str());
-  #else
-    lcd.setCursor(col, row);
-    lcd.print(s.c_str());
-  #endif 
-}
-
-/*********************************************************************************/
-
 void clearLCD()
 {
   #ifdef MATRIX_LCD
-    matrixClear();
+    //lcdMatrix.clearLcd();
   #else
     lcd.clear();
   #endif 
@@ -1629,13 +1591,13 @@ inline void HMI_InitScreen (void)
   // Welcome text 
   lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
   printLCD(0, 0, " Jedicut-Alden-USB");
-  printLCD(7, 1, Version);
-  printLCD(7, 2, BAUDRATE);
+  printLCD(7, 1, VERSION);
+  //printLCD(7, 2, BAUDRATE);
 
   
 #ifdef BUZZER_ON
   printLCD(5, 3, BUZZ_ON);
-  SoundAlarm(ON);
+  //SoundAlarm(ON);
   delay(500);
   SoundAlarm(OFF);
 #else
@@ -1648,9 +1610,16 @@ inline void HMI_InitScreen (void)
 inline void HMI_ParamsScreen (void)
 {
   clearLCD();
-  printLCD(0, 0,"mm/step " + String(MM_PER_STEP, 5));
-  printLCD (0, 1, TEXT1 + String(MAX_PERCENTAGE_WIRE, DEC) + "%");
-  printLCD (0, 2, TEXT2 + String(MAX_PERCENTAGE_CUTTER, DEC) + "%");
+  /*char mmPerStep[15];
+  char cstChar[30];
+  strcpy(cstChar,  "mm/step " );
+  snprintf(mmPerStep, sizeof(mmPerStep), "%f", MM_PER_STEP);
+  strcat(cstChar, mmPerStep);
+  printLCD(0, 0, cstChar);
+  txt = TEXT1 + String(MAX_PERCENTAGE_WIRE, DEC).c_str() + "%";
+  printLCD (0, 1, txt);
+  txt = TEXT2 + String(MAX_PERCENTAGE_CUTTER, DEC).c_str() + "%";
+  printLCD (0, 2, txt);*/
   #ifdef HEAT_CONSIGN_ROTARY_ENCODER
   printLCD(0, 3, TEXT4);
   #else
@@ -1695,7 +1664,7 @@ inline bool HMI_SwitchInitScreen (void)
   }
 
   clearLCD();
-  printLCD(0, 0, MachineName);  
+  //printLCD(0, 0, MachineName);  
   printLCD(0, 1, "MODE E MOT WIRE  CUT"); 
   printLCD(0, 3, "             0%   0%");
 
@@ -1805,7 +1774,6 @@ inline void HMI_ModeScreen (void)
       line[19] = 'S';
     }
 
-
   //  if(Switch.EndStop && Switch.EndStopShunt)
    if(Switch.EndStop && !Switch.ControlMode)
     {
@@ -1817,7 +1785,7 @@ inline void HMI_ModeScreen (void)
       SoundAlarm(OFF);
       line[5] = 'I';
     }
-    
+    line[21]='\0';
     printLCD(0, 2, line);
 
     HMI.ProcessDigit = true;
@@ -1831,7 +1799,6 @@ inline void HMI_ModeScreen (void)
 inline void HMI_ManuDigitScreen (void)
 {
   char line[21] = {"              %    %"};
-
   if((Heat.WireConsign != HMI.WireConsign) || (Heat.CutterConsign != HMI.CutterConsign) || (HMI.ProcessDigit))
   {
     HMI.WireConsign = Heat.WireConsign;
@@ -1844,8 +1811,8 @@ inline void HMI_ManuDigitScreen (void)
     line[16] = HMI.CutterConsign >= 100 ? ('0' + (HMI.CutterConsign/100)) : ' ';
     line[17] = HMI.CutterConsign >= 10 ? ('0' + ((HMI.CutterConsign/10)%10)) : ' ';
     line[18] = '0' + (HMI.CutterConsign % 10);
-    
-    printLCD(0, 3, line);
+    line[20] = '\0';
+    printLCD(0, 3, line); 
     HMI.ProcessDigit = false;
   }
 }
@@ -1853,7 +1820,7 @@ inline void HMI_ManuDigitScreen (void)
 /*********************************************************************************/
 
 inline void HMI_PcDigitScreen (void)
-{
+{  
   char line[21] = {"  0.00mm/s    %     "};
   float mmPerSec;
   byte val, valDec;
@@ -1889,17 +1856,8 @@ inline void HMI_PcDigitScreen (void)
 
 inline void HMI_DigitScreen (void)
 {
-  static unsigned long i = 0;
-
-  if(i < millis())
-  {
-    i = millis() + 100;
-
-    if(Switch.ControlMode)
-      HMI_ManuDigitScreen();
-    else
-      HMI_PcDigitScreen();
-  }
+    if(Switch.ControlMode) HMI_ManuDigitScreen();
+    else HMI_PcDigitScreen();
 }
 
 /*********************************************************************************/
@@ -1912,13 +1870,15 @@ inline void HMI_Manage (void)
   {
     case HMI_MODE_SCREEN:
       HMI_ModeScreen();
-      HMI_DigitScreen();
+      //HMI_DigitScreen();
+      lcdMatrix.printMatrix();
       break;
 
     case HMI_INIT_SCREEN:
       HMI_InitScreen();
       i = millis() + 3000;
       HMI.State = HMI_INIT_DELAY;
+      lcdMatrix.printMatrix();
       break;
 
     case HMI_INIT_DELAY:
@@ -1930,6 +1890,7 @@ inline void HMI_Manage (void)
       HMI_ParamsScreen();
       i = millis() + 3000;
       HMI.State = HMI_PARAMS_DELAY;
+      lcdMatrix.printMatrix();
       break;
 
     case HMI_PARAMS_DELAY:
@@ -1937,22 +1898,23 @@ inline void HMI_Manage (void)
       {
         HMI_InitSwitchScreen();
         HMI.State = HMI_SWITCH_SCREEN;
+        lcdMatrix.printMatrix();
       }
       break;
 
     case HMI_SWITCH_SCREEN:
       if( HMI_SwitchInitScreen())
-        HMI.State = HMI_MODE_SCREEN;
+        HMI.State = HMI_MODE_SCREEN;   
+        lcdMatrix.printMatrix();
       break;
   }
-  
 }
 
 /*********************************************************************************/
 
 inline void ModeManage (void)
 {
-  static byte modeState = MODE_INIT;
+  modeState = MODE_INIT;
 
   switch(modeState)
   {
@@ -1967,7 +1929,6 @@ inline void ModeManage (void)
         BufferFlush();
         ENABLE_T5_ISR();
         ENABLE_T1_ISR();
-        ENABLE_RX_ISR();
         modeState = MODE_PC;
       }
       else
@@ -1985,7 +1946,6 @@ inline void ModeManage (void)
     //  if(Switch.ControlMode)
       if(Switch.ControlMode || Switch.EndStop || Switch.MotorEnable)
       {
-        DISABLE_RX_ISR();
         DISABLE_T1_ISR();
         DISABLE_T5_ISR();
 
@@ -2008,13 +1968,9 @@ inline void ModeManage (void)
 /**********************************************************************************/
 void loop (void)
 {
-  
-  u8g.firstPage();
-  do {
     GetSwitchStatus();
     StepperDriverManage();
     PauseManage(); 
     ModeManage();
     HMI_Manage();
-  } while( u8g.nextPage() );
 }

@@ -262,6 +262,8 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 volatile bool toogle = true;
 bool StepperDriverEnableMode = STEPPER_DRIVER_ENABLE_HIGH_LEVEL;
 
+uint16_t cnt = 0;
+
 
 const byte heatPercentToPWMConvTab[101] = {
 
@@ -628,10 +630,10 @@ void limits_Lect()
 //==============================================================================
 void Aff_Test_Fdc ()
  {
-    printLCD(2,2,Val_X1_Limit);
-    printLCD(7, 2,Val_Y1_Limit);
-    printLCD(12, 2,Val_X2_Limit);
-    printLCD(17, 2,Val_Y2_Limit); 
+    printLCD(2,2,(char*) Val_X1_Limit);
+    printLCD(7, 2,(char*) Val_Y1_Limit);
+    printLCD(12, 2,(char*) Val_X2_Limit);
+    printLCD(17, 2,(char*) Val_Y2_Limit); 
   delay(100);// Attendre 100ms
  }
 //------------------------------------------------------------------------------
@@ -1562,7 +1564,7 @@ void printLCD(uint8_t col, uint8_t row,const char *s)
 void clearLCD()
 {
   #ifdef MATRIX_LCD
-    //lcdMatrix.clearLcd();
+    lcdMatrix.clearLcd();
   #else
     lcd.clear();
   #endif 
@@ -1680,10 +1682,9 @@ inline bool HMI_SwitchInitScreen (void)
 inline void HMI_ModeScreen (void)
 {
   static byte old = 0;
-  char line[21] = {"                    "};
+  static char line[21] = {"                    "};
 
-  if(old != Switch.Status)
-  {
+  if(old != Switch.Status){
     if(Switch.ControlMode)
     {
       line[0] = 'M';
@@ -1774,7 +1775,7 @@ inline void HMI_ModeScreen (void)
       line[19] = 'S';
     }
 
-  //  if(Switch.EndStop && Switch.EndStopShunt)
+//  if(Switch.EndStop && Switch.EndStopShunt)
    if(Switch.EndStop && !Switch.ControlMode)
     {
       SoundAlarm(ON);
@@ -1785,7 +1786,6 @@ inline void HMI_ModeScreen (void)
       SoundAlarm(OFF);
       line[5] = 'I';
     }
-    line[21]='\0';
     printLCD(0, 2, line);
 
     HMI.ProcessDigit = true;
@@ -1798,7 +1798,7 @@ inline void HMI_ModeScreen (void)
 
 inline void HMI_ManuDigitScreen (void)
 {
-  char line[21] = {"              %    %"};
+  static char line[21] = {"              %    %"};
   if((Heat.WireConsign != HMI.WireConsign) || (Heat.CutterConsign != HMI.CutterConsign) || (HMI.ProcessDigit))
   {
     HMI.WireConsign = Heat.WireConsign;
@@ -1811,7 +1811,6 @@ inline void HMI_ManuDigitScreen (void)
     line[16] = HMI.CutterConsign >= 100 ? ('0' + (HMI.CutterConsign/100)) : ' ';
     line[17] = HMI.CutterConsign >= 10 ? ('0' + ((HMI.CutterConsign/10)%10)) : ' ';
     line[18] = '0' + (HMI.CutterConsign % 10);
-    line[20] = '\0';
     printLCD(0, 3, line); 
     HMI.ProcessDigit = false;
   }
@@ -1821,7 +1820,7 @@ inline void HMI_ManuDigitScreen (void)
 
 inline void HMI_PcDigitScreen (void)
 {  
-  char line[21] = {"  0.00mm/s    %     "};
+  static char line[21] = {"  0.00mm/s    %     "};
   float mmPerSec;
   byte val, valDec;
 
@@ -1846,7 +1845,7 @@ inline void HMI_PcDigitScreen (void)
     line[11] = HMI.WireConsign >= 100 ? ('0' + (HMI.WireConsign/100)) : ' ';
     line[12] = HMI.WireConsign >= 10 ? ('0' + ((HMI.WireConsign/10)%10)) : ' ';
     line[13] = '0' + (HMI.WireConsign % 10);
-
+    line[21] = '\0';
     printLCD(0, 3, line);
     HMI.ProcessDigit = false;
   }
@@ -1870,7 +1869,7 @@ inline void HMI_Manage (void)
   {
     case HMI_MODE_SCREEN:
       HMI_ModeScreen();
-      //HMI_DigitScreen();
+      HMI_DigitScreen();
       lcdMatrix.printMatrix();
       break;
 

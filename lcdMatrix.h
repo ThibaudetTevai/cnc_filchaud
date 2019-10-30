@@ -30,8 +30,8 @@ class LcdMatrix{
     uint8_t HEIGH_SCREEN;
     uint8_t NB_COL;
     uint8_t NB_ROW;
-    U8GLIB_ST7920_128X64_1X *ptrU8g;
-    char screenContent[COL*ROW];
+    volatile U8GLIB_ST7920_128X64_1X *ptrU8g;
+    volatile char screenContent[COL*ROW];
 };
 
 #endif

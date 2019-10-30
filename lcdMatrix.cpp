@@ -25,6 +25,7 @@ void LcdMatrix::setParameter() {
 void LcdMatrix::printMatrix() { 
     //for (uint8_t i = 0; i<(this->NB_ROW * this->NB_COL); i++) printer->println(this->screenContent[i]);
     this->ptrU8g->firstPage();
+    delay(100);
     do {
         for (uint8_t i = 0; i < (this->NB_ROW); i++) {
             char toPrint[(this->NB_COL) + 1];

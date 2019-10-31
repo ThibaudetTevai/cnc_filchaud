@@ -538,7 +538,7 @@ void setup (void)
   OCR4C = 0;    // Set compare value => Compare value between 0 = 0% PWM and 200 = 100% PWM
   */
 
-   // modification frequence PWM des pin 6, 7, 8, par le timer 4  (chauffe)
+   // modification frequence PWM des pin 6,)7, 8, par le timer 4  (chauffe)
   maRaz =7; // 111 pour CS02, CS01, CS00
   maPreset = 2; //010 pour 7800 Hz ; 001 pour 62000Hz
   TCCR4B&=~ maRaz ;
@@ -1109,17 +1109,14 @@ inline void HeatingRelay (byte en)
 /**********************************************************************************/
 
 inline void ComputeRotaryEncoderHeatConsign (void){
-  if(rotBtn.isBtnPushed()){
-    if(Heat.WireConsign < MAX_PERCENTAGE_WIRE) {
-      Heat.WireConsign += 10;
-    }
-  }
-  if(rotBtn.isCntUpdated()){
-    if(Heat.WireConsign < MAX_PERCENTAGE_WIRE) {
-      Heat.WireConsign += rotBtn.getValueRot();
-      rotBtn.resetValueRot();
-    }
-    else if (Heat.WireConsign < 0) Heat.WireConsign = 0;
+  bool bntPressed = rotBtn.isBtnPushed();
+  bool cntUpdated = rotBtn.isCntUpdated();
+  if(cntUpdated || bntPressed){
+    if (bntPressed)  Heat.WireConsign += 10 * rotBtn.getValueRot();
+    else if (cntUpdated)  Heat.WireConsign += rotBtn.getValueRot();
+    rotBtn.resetValueRot();
+    if (Heat.WireConsign < 0) Heat.WireConsign = 0;
+    else if (Heat.WireConsign > MAX_PERCENTAGE_WIRE) Heat.WireConsign = MAX_PERCENTAGE_WIRE;
   }
 }
 

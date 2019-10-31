@@ -421,7 +421,9 @@ void setup(void) {
     // pins Initialization
 
     //LCD
-    lcdMatrix.setup(Serial);
+    #ifdef MATRIX_LCD 
+        lcdMatrix.setup(Serial);
+    #endif
 
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
@@ -585,8 +587,10 @@ void AideMiseServiceFdc(void) {
 //==============================================================================
 // Affichage de la Trame Etat Fins de course
 //==============================================================================
-void Affic_Trame_fdc() {
-    lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+void Affic_Trame_fdc() {    
+    #ifndef MATRIX_LCD
+        lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+    #endif
     clearLCD();
     printLCD(0, 0, TEXT17); // " Etat fin de course"
     printLCD(0, 1, "  X1   Y1   X2   Y2");
@@ -630,7 +634,6 @@ void Aff_Test_Fdc() {
 //==============================================================================
 void HomingManage() {
     if (Switch.HomingOk == false) {
-
         if ((digitalRead(PIN_SWITCH_MOTOR) == LOW)) {
             StepperDriverEnable(ON);
             Arm_Homing();
@@ -638,7 +641,6 @@ void HomingManage() {
             printLCD(0, 1, "MODE E MOT WIRE  CUT");
             GetSwitchStatus();
             HMI_ModeScreen();
-
         }
     } else {
         if (Switch.MotorEnable == 1) Desar_Homing();
@@ -1438,7 +1440,10 @@ void HMI_WriteModePC(void) {
 
 inline void HMI_InitScreen(void) {
     // Welcome text
-    lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+    #ifndef MATRIX_LCD
+        lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+    #endif
+    clearLCD();
     printLCD(0, 0, "  Jedicut-Alden-USB");
     printLCD(7, 1, VERSION);
     printLCD(7, 2, STRINGIFY(BAUDRATE));

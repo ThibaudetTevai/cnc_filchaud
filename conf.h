@@ -18,6 +18,7 @@
 #define PINS_MAT 35
 //#define CRYSTAL_LCD
 
+
 // millimeter per Step
 // Example 1: Stepper Driver setting: Full Step, Stepper Motor: 400 steps per revolution, M6 Lead screw: 1mm thread => (mm per revolution * driver setting) / step per revolution = (1*1)/400 = 0.0025
 // Ecxample 2: Stepper Driver Setting: 1/8 Step, Stepper Motor: 200 steps per revolution, Belt: 2mm between teeth, Pulley: 20 teeth => (Pulley teeth * Belt teeth interspace * driver setting) / step per revolution = (20*2*1/8)/200 = 0.025
@@ -31,7 +32,7 @@
 
 // Choix entre Potentiomètre  et encodeur pour le chauffe du fil en manuel
 // Mettre POT_CHAUF "1" pour le potentiomètre, Mettre POT_CHAUF 0 pour l'encodeur
-//#define HEAT_CONSIGN_ROTARY_ENCODER
+#define HEAT_CONSIGN_ROTARY_ENCODER
 #define HEAT_CONSIGN_POTENTIOMETER
 
 // Mettre ON_BUZZER "1" pour Alarme sonore fin de course,"0" pas d'alarme sonore
@@ -101,11 +102,11 @@ Ces paramètres déterminent les différents types de séquence Homing
 //#define INVERT_STEPPER_DRIVER_ENABLE_PIN
 
 #ifdef INVERT_STEPPER_DRIVER_ENABLE_PIN
-  #define STEPPER_DRIVER_ENABLE_HIGH_LEVEL 1
-  #define STEPPER_DRIVER_ENABLE_LOW_LEVEL 0
+	#define	STEPPER_DRIVER_ENABLE_HIGH_LEVEL 1
+	#define	STEPPER_DRIVER_ENABLE_LOW_LEVEL 0
 #else
-  #define STEPPER_DRIVER_ENABLE_HIGH_LEVEL 0
-  #define STEPPER_DRIVER_ENABLE_LOW_LEVEL 1
+	#define	STEPPER_DRIVER_ENABLE_HIGH_LEVEL 0
+	#define	STEPPER_DRIVER_ENABLE_LOW_LEVEL 1
 #endif
 
 /*==============================================================================

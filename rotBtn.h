@@ -13,26 +13,27 @@ class RotBtn
     bool    getValueBtn();
     bool    isCntUpdated();
     bool    isBtnPushed();
+	void	resetValueRot();
     
-  private:
-    void doDebounce();
-    void doEncoderRead();
-    void doUpdateCounter();
+	private:
+		void doDebounce();
+		void doEncoderRead();
+		void doUpdateCounter();
     void doUpdateBtnUpdate();
 
-    bool valueA;
-    bool valueB;
+		bool valueA;
+		bool valueB;
     bool valueP;
-    bool btnPressed;
-    bool motionDetected;
-    bool cntUpdated;
-    bool CW;
+		bool btnPressed;
+		bool motionDetected;
+		bool cntUpdated;
+		bool CW;
 
-    uint8_t nettCounter;
+		int8_t nettCounter;
 
-    Bounce debouncerA;
-    Bounce debouncerB;
-    Bounce debouncerSWITCH;
+		Bounce debouncerA;
+		Bounce debouncerB;
+		Bounce debouncerSWITCH;
 };
 
 #endif

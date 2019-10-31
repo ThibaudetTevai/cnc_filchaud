@@ -37,7 +37,6 @@ void RotBtn::rotBtnRefresh() {
 
 bool RotBtn::isBtnPushed(){
   if(this->btnPressed){
-    
     this->btnPressed = false;
     return true;
   }
@@ -58,6 +57,10 @@ uint8_t RotBtn::getValueRot(){
 
 bool RotBtn::getValueBtn(){
   return this->valueP;
+}
+
+void RotBtn::resetValueRot(){
+  this->nettCounter = 0;
 }
 
 void RotBtn::doDebounce(){

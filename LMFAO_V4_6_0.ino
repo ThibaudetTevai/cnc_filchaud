@@ -74,6 +74,7 @@
 #include "lang.h"
 #include "lcdMatrix.h"
 #include "rotBtn.h"
+#include "utility.h"
 
 
 /* DEFINE */
@@ -294,7 +295,7 @@ enum RotaryEncoderState
   NEGATIF
 };
 
-const byte rotaryEncoderTable[16] = {UNCHANGED, POSITIF, NEGATIF, UNCHANGED, POSITIF, UNCHANGED, UNCHANGED, NEGATIF, NEGATIF, UNCHANGED, UNCHANGED, POSITIF, UNCHANGED, POSITIF, NEGATIF, UNCHANGED};
+//const byte rotaryEncoderTable[16] = {UNCHANGED, POSITIF, NEGATIF, UNCHANGED, POSITIF, UNCHANGED, UNCHANGED, NEGATIF, NEGATIF, UNCHANGED, UNCHANGED, POSITIF, UNCHANGED, POSITIF, NEGATIF, UNCHANGED};
 
 enum ParseState
 {
@@ -360,7 +361,7 @@ struct StructHMI
 } HMI;
 
 #ifdef MACHINE_NAME
-  const char* MachineName = String(MACHINE_NAME).c_str();
+  const char MachineName [sizeof(STRINGIFY(MACHINE_NAME))] = STRINGIFY(MACHINE_NAME);
 #else
   const char* MachineName = " JediCut-Alden USB";
 #endif
@@ -423,13 +424,14 @@ void setup (void)
 
   //LCD
   lcdMatrix.setup(Serial);
-  pinMode(PIN_ROTARY_ENCODER_PUSHBUTTON, INPUT);
-  digitalWrite(PIN_ROTARY_ENCODER_PUSHBUTTON, HIGH);
+  // Replaced by RotBtn. | Global variable : RotBtn
+  // pinMode(PIN_ROTARY_ENCODER_PUSHBUTTON, INPUT);
+  // digitalWrite(PIN_ROTARY_ENCODER_PUSHBUTTON, HIGH);
 
-  pinMode(PIN_ROTARY_ENCODER_A, INPUT);
-  pinMode(PIN_ROTARY_ENCODER_B, INPUT);
-  digitalWrite(PIN_ROTARY_ENCODER_A, HIGH);
-  digitalWrite(PIN_ROTARY_ENCODER_B, HIGH);
+  // pinMode(PIN_ROTARY_ENCODER_A, INPUT);
+  // pinMode(PIN_ROTARY_ENCODER_B, INPUT);
+  // digitalWrite(PIN_ROTARY_ENCODER_A, HIGH);
+  // digitalWrite(PIN_ROTARY_ENCODER_B, HIGH);
 
   pinMode(PIN_BUZZER, OUTPUT);
   digitalWrite(PIN_BUZZER, LOW);
@@ -630,11 +632,11 @@ void limits_Lect()
 //==============================================================================
 void Aff_Test_Fdc ()
  {
-    printLCD(2,2,(char*) Val_X1_Limit);
-    printLCD(7, 2,(char*) Val_Y1_Limit);
-    printLCD(12, 2,(char*) Val_X2_Limit);
-    printLCD(17, 2,(char*) Val_Y2_Limit); 
-  delay(100);// Attendre 100ms
+    // printLCD(2,2,(char*) Val_X1_Limit);
+    // printLCD(7, 2,(char*) Val_Y1_Limit);
+    // printLCD(12, 2,(char*) Val_X2_Limit);
+    // printLCD(17, 2,(char*) Val_Y2_Limit); 
+    delay(100);// Attendre 100ms
  }
 //------------------------------------------------------------------------------
 
@@ -738,7 +740,7 @@ void cycle_1()
 { 
  byte tr_mask_limits =0 ;
   //calcul de la tempo entre chaque step pour la vitesse d'approche
-  unsigned int tempo_step = MM_PER_STEP / VIT_RECH_FDC * 1000000 ; 
+  unsigned int tempo_step = MM_PER_STEP / VIT_RECH_FDC * 1000000 ; //555,555
   if (POS_SECU_Y == 1 )
   {
     unsigned int Nbre_pas = MM_POS_SECU_Y / MM_PER_STEP ;
@@ -992,8 +994,8 @@ inline void PauseManage (void)
     {
     ActivePause = 0 ;
     kPause = 0;
-  printLCD(0,0,"                   ");
-  //printLCD(0,0,MachineName);
+    printLCD(0,0,"                   ");
+    printLCD(0,0,MachineName);
     ENABLE_T5_ISR();
     }
   }
@@ -1106,37 +1108,19 @@ inline void HeatingRelay (byte en)
 
 /**********************************************************************************/
 
-inline void ComputeRotaryEncoderHeatConsign (void)
-{
-/*  bool rotEncA, rotEncB;
-  byte rotStatus = 0;
-
-  if(!digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON))
-  {
-    while(digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON));
-    do
-    {
-      rotEncA = digitalRead(PIN_ROTARY_ENCODER_A);
-      rotEncB = digitalRead(PIN_ROTARY_ENCODER_B);
-      bitWrite(rotStatus, 3, rotEncA);
-      bitWrite(rotStatus, 1, rotEncB);
-      if(rotaryEncoderTable[rotStatus] & 0x01)
-      {
-        if(Heat.WireConsign < MAX_PERCENTAGE_WIRE)
-          Heat.WireConsign++;
-      }
-      else if(rotaryEncoderTable[rotStatus] & 0x02)
-      {
-        if(Heat.WireConsign != 0)
-          Heat.WireConsign--;
-      }
-      bitWrite(rotStatus, 2, rotEncA);
-      bitWrite(rotStatus, 0, rotEncB);
-
-    }while(!digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON));
-    while(digitalRead(PIN_ROTARY_ENCODER_PUSHBUTTON));
+inline void ComputeRotaryEncoderHeatConsign (void){
+  if(rotBtn.isBtnPushed()){
+    if(Heat.WireConsign < MAX_PERCENTAGE_WIRE) {
+      Heat.WireConsign += 10;
+    }
   }
-*/
+  if(rotBtn.isCntUpdated()){
+    if(Heat.WireConsign < MAX_PERCENTAGE_WIRE) {
+      Heat.WireConsign += rotBtn.getValueRot();
+      rotBtn.resetValueRot();
+    }
+    else if (Heat.WireConsign < 0) Heat.WireConsign = 0;
+  }
 }
 
 /**********************************************************************************/
@@ -1238,13 +1222,13 @@ void ResetHeat (void)
 
 inline void SoundAlarm (bool en)
 {
-  if(en)
+  /*if(en)
     ENABLE_T2_ISR();
   else
   {
     DISABLE_T2_ISR();
     digitalWrite(PIN_BUZZER, LOW);
-  }
+  }*/
 }
 
 /*********************************************************************************/
@@ -1553,6 +1537,7 @@ void printLCD(uint8_t col, uint8_t row,const char *s)
   #ifdef MATRIX_LCD
     Serial.println(s);
     lcdMatrix.printLcd(col, row, s);
+    lcdMatrix.printMatrix();
   #else
     lcd.setCursor(col, row);
     lcd.print(s);
@@ -1592,14 +1577,14 @@ inline void HMI_InitScreen (void)
 {
   // Welcome text 
   lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
-  printLCD(0, 0, " Jedicut-Alden-USB");
+  printLCD(0, 0, "  Jedicut-Alden-USB");
   printLCD(7, 1, VERSION);
-  //printLCD(7, 2, BAUDRATE);
+  printLCD(7, 2, STRINGIFY(BAUDRATE));
 
   
 #ifdef BUZZER_ON
   printLCD(5, 3, BUZZ_ON);
-  //SoundAlarm(ON);
+  SoundAlarm(ON);
   delay(500);
   SoundAlarm(OFF);
 #else
@@ -1612,16 +1597,23 @@ inline void HMI_InitScreen (void)
 inline void HMI_ParamsScreen (void)
 {
   clearLCD();
-  /*char mmPerStep[15];
-  char cstChar[30];
-  strcpy(cstChar,  "mm/step " );
-  snprintf(mmPerStep, sizeof(mmPerStep), "%f", MM_PER_STEP);
-  strcat(cstChar, mmPerStep);
-  printLCD(0, 0, cstChar);
-  txt = TEXT1 + String(MAX_PERCENTAGE_WIRE, DEC).c_str() + "%";
-  printLCD (0, 1, txt);
-  txt = TEXT2 + String(MAX_PERCENTAGE_CUTTER, DEC).c_str() + "%";
-  printLCD (0, 2, txt);*/
+  
+  static char temp0[sizeof("mm/step ")+10] = {' '}; // 10 because sizeof(MM_PER_STEP) make somme crash
+  strcat(temp0, "mm/step ");
+  strcat(temp0, STRINGIFY(MM_PER_STEP));
+  printLCD (0, 0, temp0);
+
+  static char temp1[sizeof(TEXT1)+sizeof(MAX_PERCENTAGE_WIRE)+1] = {' '};
+  strcat(temp1,TEXT1);
+  strcat(temp1,itostr3left(MAX_PERCENTAGE_WIRE));
+  strcat(temp1,"%");
+  printLCD (0, 1, temp1);
+  
+  static char temp2[sizeof(TEXT2)+sizeof(MAX_PERCENTAGE_CUTTER)+1] = {' '};
+  strcat(temp2,TEXT2);
+  strcat(temp2,itostr3left((MAX_PERCENTAGE_CUTTER)));
+  strcat(temp2,"%");
+  printLCD (0, 2, temp2);
   #ifdef HEAT_CONSIGN_ROTARY_ENCODER
   printLCD(0, 3, TEXT4);
   #else
@@ -1666,7 +1658,7 @@ inline bool HMI_SwitchInitScreen (void)
   }
 
   clearLCD();
-  //printLCD(0, 0, MachineName);  
+  printLCD(0, 0, MachineName);  
   printLCD(0, 1, "MODE E MOT WIRE  CUT"); 
   printLCD(0, 3, "             0%   0%");
 
@@ -1700,6 +1692,7 @@ inline void HMI_ModeScreen (void)
       }
       else
       {
+        line[7] = ' ';
         line[8] = 'O';
         line[9] = 'N';
       }
@@ -1731,14 +1724,17 @@ inline void HMI_ModeScreen (void)
       }
       else
       {
+        line[17] = ' ';
         line[18] = 'O';
         line[19] = 'N';
       }
     }
     else
     {
+      line[0] = ' ';
       line[1] = 'P';
       line[2] = 'C';
+      line[3] = ' ';
 
       if(Switch.MotorEnable)
       {
@@ -1760,6 +1756,7 @@ inline void HMI_ModeScreen (void)
       }
       else if(!Switch.HeatPC)
       {
+        line[12] = ' ';
         line[13] = 'P';
         line[14] = 'C';
       }
@@ -1864,20 +1861,18 @@ inline void HMI_DigitScreen (void)
 inline void HMI_Manage (void)
 {
   static unsigned long i = 0;
-
+  rotBtn.rotBtnRefresh();
   switch(HMI.State)
   {
     case HMI_MODE_SCREEN:
       HMI_ModeScreen();
       HMI_DigitScreen();
-      lcdMatrix.printMatrix();
       break;
 
     case HMI_INIT_SCREEN:
       HMI_InitScreen();
       i = millis() + 3000;
       HMI.State = HMI_INIT_DELAY;
-      lcdMatrix.printMatrix();
       break;
 
     case HMI_INIT_DELAY:
@@ -1889,7 +1884,6 @@ inline void HMI_Manage (void)
       HMI_ParamsScreen();
       i = millis() + 3000;
       HMI.State = HMI_PARAMS_DELAY;
-      lcdMatrix.printMatrix();
       break;
 
     case HMI_PARAMS_DELAY:
@@ -1897,14 +1891,12 @@ inline void HMI_Manage (void)
       {
         HMI_InitSwitchScreen();
         HMI.State = HMI_SWITCH_SCREEN;
-        lcdMatrix.printMatrix();
       }
       break;
 
     case HMI_SWITCH_SCREEN:
       if( HMI_SwitchInitScreen())
-        HMI.State = HMI_MODE_SCREEN;   
-        lcdMatrix.printMatrix();
+        HMI.State = HMI_MODE_SCREEN;  
       break;
   }
 }
@@ -1913,8 +1905,7 @@ inline void HMI_Manage (void)
 
 inline void ModeManage (void)
 {
-  modeState = MODE_INIT;
-
+  //modeState = MODE_INIT;
   switch(modeState)
   {
     case MODE_INIT:
@@ -1943,6 +1934,7 @@ inline void ModeManage (void)
 
     case MODE_PC:
     //  if(Switch.ControlMode)
+    
       if(Switch.ControlMode || Switch.EndStop || Switch.MotorEnable)
       {
         DISABLE_T1_ISR();

@@ -632,10 +632,15 @@ void limits_Lect()
 //==============================================================================
 void Aff_Test_Fdc ()
  {
-    // printLCD(2,2,(char*) Val_X1_Limit);
-    // printLCD(7, 2,(char*) Val_Y1_Limit);
-    // printLCD(12, 2,(char*) Val_X2_Limit);
-    // printLCD(17, 2,(char*) Val_Y2_Limit); 
+    char val[5];
+    sprintf(val,"%d",Val_X1_Limit);
+    printLCD(2,2,val);
+    sprintf(val,"%d",Val_Y1_Limit);
+    printLCD(7, 2, val);
+    sprintf(val,"%d",Val_X2_Limit);
+    printLCD(12, 2, val);
+    sprintf(val,"%d",Val_Y2_Limit);
+    printLCD(17, 2, val); 
     delay(100);// Attendre 100ms
  }
 //------------------------------------------------------------------------------

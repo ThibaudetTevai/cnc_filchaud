@@ -930,7 +930,7 @@ inline void PauseManage(void) {
             Cad_Aff = millis() + 250;
 
             printLCD(7, 0, "   ");
-            printLCD(7, 0, RePause);
+            printLCD(7, 0, ftostr62rj(RePause));
         }
 
         if (millis() > kPause) {
@@ -1166,7 +1166,7 @@ inline void ProcessCommand(void) {
         Cad_Aff = millis() + 250;
 
         printLCD(0, 0, "Pause      secondes ");
-        printLCD(7, 0, PC.Pause / 1000);
+        printLCD(7, 0, ftostr62rj(PC.Pause / 1000));
 
         break;
 

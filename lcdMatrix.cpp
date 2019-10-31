@@ -45,12 +45,13 @@ void LcdMatrix::printLcd(uint8_t col, uint8_t row, const char * s) {
     
     if (startPos > (((this->NB_COL) * (this->NB_ROW)) - 1))return;
     while (s[i] != '\0' && i <= this->NB_COL) {
-        this->screenContent[startPos + i] = s[i++];
+        this->screenContent[startPos + i] = s[i];
+        i++;
     }
 }
 
 void LcdMatrix::clearLcd() {
     this->ptrU8g->firstPage();
-    memset( this->screenContent,' ' , this->NB_ROW * this->NB_COL );
+    memset((void *) this->screenContent,' ' , this->NB_ROW * this->NB_COL );
     do {} while (this->ptrU8g->nextPage());
 }

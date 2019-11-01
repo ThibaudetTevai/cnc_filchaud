@@ -220,3 +220,10 @@ char* ftostr52sp(const float &f) {
   }
   return &conv[1];
 }
+
+char * insertWord( char* destPtr, char* srcPtr, int pos){
+  for (int i = 0;(*(srcPtr+i) || *(destPtr+i+pos)) != '\0'; i++){
+    *(destPtr+i+pos) = *(srcPtr+i);
+  }
+  return destPtr;
+}

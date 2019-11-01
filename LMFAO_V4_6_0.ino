@@ -593,7 +593,7 @@ void Affic_Trame_fdc() {
     #endif
     clearLCD();
     printLCD(0, 0, TEXT17); // " Etat fin de course"
-    printLCD(0, 1, "  X1   Y1   X2   Y2");
+    printLCD(0, 1, TITLE_FDC);
     printLCD(0, 3, TEXT18); // "Fin -> Pot Ch < 10%"
 }
 //------------------------------------------------------------------------------
@@ -624,7 +624,7 @@ void Aff_Test_Fdc() {
     sprintf(val, "%d", Val_X2_Limit);
     printLCD(12, 2, val);
     sprintf(val, "%d", Val_Y2_Limit);
-    printLCD(17, 2, val);
+    printLCD_I(17, 2, val);
     delay(100); // Attendre 100ms
 }
 //------------------------------------------------------------------------------
@@ -637,8 +637,7 @@ void HomingManage() {
         if ((digitalRead(PIN_SWITCH_MOTOR) == LOW)) {
             StepperDriverEnable(ON);
             Arm_Homing();
-
-            printLCD(0, 1, "MODE E MOT WIRE  CUT");
+            printLCD(0, 1, TITLE_MENU);
             GetSwitchStatus();
             HMI_ModeScreen();
         }
@@ -656,7 +655,8 @@ void Arm_Homing() {
         printLCD(0, 1, TEXT19);
         printLCD(0, 1, TEXT19);
         printLCD(0, 2, "C1a C1 C2 C3 C4 Ppos");
-        printLCD(0, 3, "                    ");
+        printLCD_I(0, 3, "                    ");
+        
 
         while ((digitalRead(PIN_BP_HOMING) == HIGH));
         homing_set();
@@ -716,7 +716,7 @@ void cycle_1() {
     if (POS_SECU_Y == 1) {
         unsigned int Nbre_pas = MM_POS_SECU_Y / MM_PER_STEP;
 
-        printLCD(0, 3, "===");
+        printLCD_I(0, 3, "===");
 
         for (unsigned int i = Nbre_pas; i > 0; i--) {
             h_motCkDir = 0x0C; // 00001100
@@ -726,7 +726,7 @@ void cycle_1() {
     }
 
     // Recherche fdc X1 et X2
-    printLCD(3, 3, "==");
+    printLCD_I(3, 3, "==");
 
     do {
         limits_Lect();
@@ -739,7 +739,7 @@ void cycle_1() {
     while (mask_limits < 0x03);
 
     // Recherche fdc Y1 et Y2
-    printLCD(5, 3, "==");
+    printLCD_I(5, 3, "==");
     do {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0xFF;
@@ -757,7 +757,7 @@ void cycle_1() {
 //==============================================================================
 void cycle_2() {
 
-    printLCD(7, 3, "==");
+    printLCD_I(7, 3, "==");
 
     byte tr_mask_limits = 0;
 
@@ -782,7 +782,7 @@ void cycle_2() {
 
 void cycle_3() {
 
-    printLCD(9, 3, "===");
+    printLCD_I(9, 3, "===");
 
     byte tr_mask_limits = 0;
 
@@ -805,7 +805,7 @@ void cycle_3() {
 //==============================================================================
 void cycle_4() {
 
-    printLCD(12, 3, "====");
+    printLCD_I(12, 3, "====");
 
     byte tr_mask_limits = 0;
 
@@ -829,7 +829,7 @@ void cycle_4() {
 // puis  les axes X rejoignent les mm demandés
 //==============================================================================
 void prepos_set() {
-    printLCD(16, 3, "====");
+    printLCD_I(16, 3, "====");
 
     //calcul de la tempo pour la vitesse de déplacement (Grande Vitesse).
     unsigned int tempo_step = MM_PER_STEP / VIT_RECH_FDC * 1000000;
@@ -875,7 +875,7 @@ void Trait_Arr_fdc() {
     printLCD(0, 0, TEXT11);
     printLCD(0, 1, "  X1   Y1   X2   Y2");
     printLCD(0, 3, TEXT12);
-    Aff_Test_Fdc();
+    Aff_Test_Fdc(); // Inside this methode we print the matrix
     while (digitalRead(PIN_BP_HOMING) == HIGH); //alarmSonor();
     SoundAlarm(OFF);
     while (digitalRead(PIN_BP_HOMING) == LOW);
@@ -884,8 +884,8 @@ void Trait_Arr_fdc() {
     testPosIntDem();
     clearLCD();
     printLCD(0, 0, MachineName);
-    printLCD(0, 1, "MODE E MOT WIRE  CUT");
-    printLCD(0, 3, "             0%   0%");
+    printLCD(0, 1, TITLE_MENU);
+    printLCD(0, 3, TITLE_VAR);
 }
 
 //------------------------------------------------------------------------------
@@ -898,24 +898,24 @@ void testPosIntDem() {
     printLCD(0, 2, TEXT6);
     if (digitalRead(PIN_SWITCH_CONTROL_MODE) == LOW) // test si l'inter Mode est sur Manu
     {
-        printLCD(0, 3, TEXT7);
+        printLCD_I(0, 3, TEXT7);
         while (digitalRead(PIN_SWITCH_CONTROL_MODE) == LOW);
     }
 
     if (digitalRead(PIN_SWITCH_MOTOR) == LOW) // test si l'inter Moteur est sur OFF
     {
-        printLCD(0, 3, TEXT8); // "Mettre Mot. sur OFF" attente inter Moteur sur OFF
+        printLCD_I(0, 3, TEXT8); // "Mettre Mot. sur OFF" attente inter Moteur sur OFF
         while (digitalRead(PIN_SWITCH_MOTOR) == LOW);
     }
     if ((digitalRead(PIN_SWITCH_HEATING_PC == LOW) | (digitalRead(PIN_SWITCH_HEATING_MANU) == LOW))) // test si l'inter Chauffe est sur OFF
     {
-        printLCD(0, 3, TEXT9);
+        printLCD_I(0, 3, TEXT9);
         while ((digitalRead(PIN_SWITCH_HEATING_PC) == LOW) | (digitalRead(PIN_SWITCH_HEATING_MANU) == LOW));
     }
 
     if (digitalRead(PIN_SWITCH_HEATING_CUTTER) == LOW) // test si l'inter Moteur est sur OFF
     {
-        printLCD(0, 3, TEXT10); // "Mettre Cut sur OFF" attente inter Moteur sur OFF
+        printLCD_I(0, 3, TEXT10); // "Mettre Cut sur OFF" attente inter Moteur sur OFF
         while (digitalRead(PIN_SWITCH_HEATING_CUTTER) == LOW);
     }
 
@@ -1032,11 +1032,11 @@ inline void HeatingRelay(byte en) {
 /**********************************************************************************/
 
 inline void ComputeRotaryEncoderHeatConsign(void) {
-    bool bntPressed = rotBtn.isBtnPushed();
-    bool cntUpdated = rotBtn.isCntUpdated();
+    bool bntPressed = rotBtn.isBtnPushed(); // Get state and reset flag
+    bool cntUpdated = rotBtn.isCntUpdated(); // Get state and reset flag
     if (cntUpdated || bntPressed) {
-        if (bntPressed) Heat.WireConsign += 10 * rotBtn.getValueRot();
-        else if (cntUpdated) Heat.WireConsign += rotBtn.getValueRot();
+        if (bntPressed) Heat.WireConsign += 10 * rotBtn.getValueRot(); // x 10 the value
+        else if (cntUpdated) Heat.WireConsign += rotBtn.getValueRot(); // Value <- +1 or -1
         rotBtn.resetValueRot();
         if (Heat.WireConsign < 0) Heat.WireConsign = 0;
         else if (Heat.WireConsign > MAX_PERCENTAGE_WIRE) Heat.WireConsign = MAX_PERCENTAGE_WIRE;
@@ -1167,8 +1167,8 @@ inline void ProcessCommand(void) {
         kPause = millis() + PC.Pause;
         Cad_Aff = millis() + 250;
 
-        printLCD(0, 0, "Pause      secondes ");
-        printLCD(7, 0, ftostr62rj(PC.Pause / 1000));
+        printLCD_I(0, 0, "Pause      secondes ");
+        printLCD_I(7, 0, ftostr62rj(PC.Pause / 1000));
 
         break;
 
@@ -1405,10 +1405,20 @@ void printLCD(uint8_t col, uint8_t row,
     #ifdef MATRIX_LCD
       Serial.println(s);
       lcdMatrix.printLcd(col, row, s);
-      lcdMatrix.printMatrix();
     #else
       lcd.setCursor(col, row);
       lcd.print(s);
+    #endif
+}
+
+/*********************************************************************************/
+
+void printLCD_I(uint8_t col, uint8_t row, const char * s) {
+    printLCD(col,row,s);
+    #ifdef MATRIX_LCD
+        // Print imidialty -> You must use this methode
+        // before a Do/While
+        lcdMatrix.printMatrix(); 
     #endif
 }
 
@@ -1526,8 +1536,8 @@ inline bool HMI_SwitchInitScreen(void) {
 
     clearLCD();
     printLCD(0, 0, MachineName);
-    printLCD(0, 1, "MODE E MOT WIRE  CUT");
-    printLCD(0, 3, "             0%   0%");
+    printLCD(0, 1, TITLE_MENU);
+    printLCD(0, 3, TITLE_VAR);
 
     #ifdef DEBUG
       digitalWrite(13, LOW);
@@ -1540,93 +1550,59 @@ inline bool HMI_SwitchInitScreen(void) {
 
 inline void HMI_ModeScreen(void) {
     static byte old = 0;
-    static char line[21] = {
-        "                    "
-    };
+    
 
     if (old != Switch.Status) {
+        printLCD(0, 2, "                    ");
         if (Switch.ControlMode) {
-            line[0] = 'M';
-            line[1] = 'A';
-            line[2] = 'N';
-            line[3] = 'U';
+            printLCD(0, 2, MAN);
 
             if (Switch.MotorEnable) {
-                line[7] = 'O';
-                line[8] = 'F';
-                line[9] = 'F';
+                printLCD(7, 2, OFF_STATUS);
             } else {
-                line[7] = ' ';
-                line[8] = 'O';
-                line[9] = 'N';
+                printLCD(7, 2, ON_STATUS);
             }
 
             if (!Switch.HeatManu) {
-                line[12] = 'M';
-                line[13] = 'A';
-                line[14] = 'N';
+                printLCD(12, 2, MAN);
             } else if (!Switch.HeatPC) {
-                line[12] = 'D';
-                line[13] = 'I';
-                line[14] = 'S';
+                printLCD(12, 2, DIS);
             } else {
-                line[12] = 'O';
-                line[13] = 'F';
-                line[14] = 'F';
+                printLCD(12, 2, OFF_STATUS);
             }
 
             if (Switch.CutterEnable) {
-                line[17] = 'O';
-                line[18] = 'F';
-                line[19] = 'F';
+                printLCD(17, 2, OFF_STATUS);
             } else {
-                line[17] = ' ';
-                line[18] = 'O';
-                line[19] = 'N';
+                printLCD(17, 2, ON_STATUS);
             }
         } else {
-            line[0] = ' ';
-            line[1] = 'P';
-            line[2] = 'C';
-            line[3] = ' ';
+                printLCD(0, 2, PC_STATUS);
 
             if (Switch.MotorEnable) {
-                line[7] = 'O';
-                line[8] = 'F';
-                line[9] = 'F';
+                printLCD(7, 2, OFF_STATUS);
             } else {
-                line[8] = 'P';
-                line[9] = 'C';
+                printLCD(8, 2, PC_STATUS);
             }
 
             if (!Switch.HeatManu) {
-                line[12] = 'M';
-                line[13] = 'A';
-                line[14] = 'N';
+                printLCD(12, 2, MAN);
             } else if (!Switch.HeatPC) {
-                line[12] = ' ';
-                line[13] = 'P';
-                line[14] = 'C';
+                printLCD(12, 2, PC_STATUS);
             } else {
-                line[12] = 'O';
-                line[13] = 'F';
-                line[14] = 'F';
+                printLCD(12, 2, OFF_STATUS);
             }
-
-            line[17] = 'D';
-            line[18] = 'I';
-            line[19] = 'S';
+            printLCD(17, 2, DIS);
         }
 
         //  if(Switch.EndStop && Switch.EndStopShunt)
         if (Switch.EndStop && !Switch.ControlMode) {
             SoundAlarm(ON);
-            line[5] = 'K';
+            printLCD(5, 2, "K");
         } else {
             SoundAlarm(OFF);
-            line[5] = 'I';
+            printLCD(5, 2, "I");
         }
-        printLCD(0, 2, line);
 
         HMI.ProcessDigit = true;
 
@@ -1786,4 +1762,5 @@ void loop(void) {
     PauseManage();
     ModeManage();
     HMI_Manage();
+    lcdMatrix.printMatrix();
 }

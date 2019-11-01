@@ -46,8 +46,19 @@
   #define TEXT19 "   Attente Homing   "
   #define TEXT20 " Homing Termine     "
 
-  #define BUZZ_ON "BUZZER ON"
-  #define BUZZ_OFF "BUZZER OFF"
+  #define BUZZ_ON     "BUZZER ON"
+  #define BUZZ_OFF    "BUZZER OFF"
+
+  #define OFF_STATUS  "OFF"
+  #define ON_STATUS   " ON"
+  #define MAN         "MAN"
+  #define DIS         "DIS"
+  #define PC_STATUS   "PC "
+  #define ON_STATUS   " ON"
+
+  #define TITLE_MENU  "MODE E MOT WIRE  CUT"
+  #define TITLE_FDC   "  X1   Y1   X2   Y2"
+  #define TITLE_VAR   "             0%   0%"
 #endif        
 
 // I suggest the following as they read better in English
@@ -72,6 +83,16 @@
   #define TEXT18 "Exit-> Heat < 10%   "
   #define TEXT19 "Waiting for Homing  "
   #define TEXT20 "  Homing Finished   "
+
+  #define BUZZ_ON "BUZZER ON"
+  #define BUZZ_OFF "BUZZER OFF"
+
+  #define OFF_STATUS "OFF"
+  #define ON_STATUS " ON"
+  #define MAN "MAN"
+  #define DIS " DIS"
+  #define PC_STATUS " PC "
+  #define ON_STATUS " ON"
 #endif
 
 #endif                 

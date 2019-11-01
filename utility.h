@@ -75,4 +75,7 @@ FORCE_INLINE char* ftostr3(const float &x) { return itostr3(int(x + (x < 0 ? -0.
 // Convert float to rj string with 1234, _123, 12.3, _1.2, -123, _-12, or -1.2 format
 char* ftostr4sign(const float &fx);
 
+// Insert word in array.
+char * insertWord(char* destPtr, char* srcPtr, int pos);
+
 #endif // __UTILITY_H__

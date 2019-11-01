@@ -4,7 +4,7 @@
 
 //#define DEBUG
 
-#define MACHINE_NAME "  CNC FIL AERODEN"
+#define MACHINE_NAME "   CNC FIL AERODEN"
 
 #define VERSION "v4.6.0"
 
@@ -32,7 +32,7 @@
 
 // Choix entre Potentiomètre  et encodeur pour le chauffe du fil en manuel
 // Mettre POT_CHAUF "1" pour le potentiomètre, Mettre POT_CHAUF 0 pour l'encodeur
-#define HEAT_CONSIGN_ROTARY_ENCODER
+//#define HEAT_CONSIGN_ROTARY_ENCODER
 #define HEAT_CONSIGN_POTENTIOMETER
 
 // Mettre ON_BUZZER "1" pour Alarme sonore fin de course,"0" pas d'alarme sonore

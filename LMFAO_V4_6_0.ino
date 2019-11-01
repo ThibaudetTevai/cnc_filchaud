@@ -361,9 +361,9 @@ struct StructHMI {
 } HMI;
 
 #ifdef MACHINE_NAME
-  const char MachineName[sizeof(STRINGIFY(MACHINE_NAME))] = STRINGIFY(MACHINE_NAME);
+  const char MachineName[sizeof(STRINGIFY(MACHINE_NAME))] = MACHINE_NAME;
 #else
-    const char * MachineName = " JediCut-Alden USB";
+    const char * MachineName = TITLE_JEDICUT;
 #endif
 
 unsigned char MachineNameChar[LCD_COLUMN_COUNT];
@@ -1220,7 +1220,7 @@ ISR(TIMER5_COMPA_vect) {
 /*ISR(USART0_RX_vect)*/
 void serialEvent() {
     while (Serial.available()) {
-        if (modeState == MODE_PC) ComParse((char) Serial.read());
+        if (modeState == MODE_PC) ComParse(Serial.read());
     }
 }
 
@@ -1329,15 +1329,14 @@ inline void DataProcess(unsigned char * data) {
 inline void ComParse(unsigned char data) {
     static byte i = 0;
     static unsigned char Cmd[CMD_DATA_SIZE];
-    static byte CmdSize = 0;
-
+    static byte CmdSize = 0; 
     switch (ParserState) {
       case PARSER_STATE_CMD:
           if ((data == 'A') || (data == 'H') || (data == 'M')) {
               Cmd[0] = data;
               i = 1;
               CmdSize = TWO_BYTE_CMD;
-              ParserState = PARSER_STATE_DATA;
+              ParserState = PARSER_STATE_DATA;   
           } else if ((data == 'F') || (data == 'P')) {
               Cmd[0] = data;
               i = 1;
@@ -1454,7 +1453,7 @@ inline void HMI_InitScreen(void) {
         lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
     #endif
     clearLCD();
-    printLCD(0, 0, "  Jedicut-Alden-USB");
+    printLCD(0, 0, TITLE_JEDICUT);
     printLCD(7, 1, VERSION);
     printLCD(7, 2, STRINGIFY(BAUDRATE));
 
@@ -1473,10 +1472,8 @@ inline void HMI_InitScreen(void) {
 inline void HMI_ParamsScreen(void) {
     clearLCD();
 
-    static char temp0[sizeof("mm/step ") + 10] = {
-        ' '
-    }; // 10 because sizeof(MM_PER_STEP) make somme crash
-    strcat(temp0, "mm/step ");
+    static char temp0[sizeof(MM_STEP) + 10] = {' '}; // +10 because sizeof(MM_PER_STEP) make somme crash
+    strcat(temp0, MM_STEP);
     strcat(temp0, STRINGIFY(MM_PER_STEP));
     printLCD(0, 0, temp0);
 
@@ -1557,41 +1554,25 @@ inline void HMI_ModeScreen(void) {
         if (Switch.ControlMode) {
             printLCD(0, 2, MAN);
 
-            if (Switch.MotorEnable) {
-                printLCD(7, 2, OFF_STATUS);
-            } else {
-                printLCD(7, 2, ON_STATUS);
-            }
+            if (Switch.MotorEnable) printLCD(7, 2, OFF_STATUS);
+            else printLCD(7, 2, ON_STATUS);
 
-            if (!Switch.HeatManu) {
-                printLCD(12, 2, MAN);
-            } else if (!Switch.HeatPC) {
-                printLCD(12, 2, DIS);
-            } else {
-                printLCD(12, 2, OFF_STATUS);
-            }
+            if (!Switch.HeatManu) printLCD(12, 2, MAN);
+            else if (!Switch.HeatPC) printLCD(12, 2, DIS);
+            else printLCD(12, 2, OFF_STATUS);
 
-            if (Switch.CutterEnable) {
-                printLCD(17, 2, OFF_STATUS);
-            } else {
-                printLCD(17, 2, ON_STATUS);
-            }
+            if (Switch.CutterEnable) printLCD(17, 2, OFF_STATUS);
+            else printLCD(17, 2, ON_STATUS);
         } else {
-                printLCD(0, 2, PC_STATUS);
+            printLCD(0, 2, PC_STATUS);
 
-            if (Switch.MotorEnable) {
-                printLCD(7, 2, OFF_STATUS);
-            } else {
-                printLCD(8, 2, PC_STATUS);
-            }
+            if (Switch.MotorEnable) printLCD(7, 2, OFF_STATUS);
+            else printLCD(8, 2, PC_STATUS);
 
-            if (!Switch.HeatManu) {
-                printLCD(12, 2, MAN);
-            } else if (!Switch.HeatPC) {
-                printLCD(12, 2, PC_STATUS);
-            } else {
-                printLCD(12, 2, OFF_STATUS);
-            }
+            if (!Switch.HeatManu) printLCD(12, 2, MAN);
+            else if (!Switch.HeatPC) printLCD(12, 2, PC_STATUS);
+            else printLCD(12, 2, OFF_STATUS);
+
             printLCD(17, 2, DIS);
         }
 
@@ -1605,7 +1586,6 @@ inline void HMI_ModeScreen(void) {
         }
 
         HMI.ProcessDigit = true;
-
         old = Switch.Status;
     }
 }
@@ -1633,7 +1613,7 @@ inline void HMI_ManuDigitScreen(void) {
 /*********************************************************************************/
 
 inline void HMI_PcDigitScreen(void) {
-    static char line[21] = {"  0.00mm/s    %     "};
+    static char line[21] = {TITLE_VAR2};
     float mmPerSec;
     byte val, valDec;
 
@@ -1721,6 +1701,11 @@ inline void ModeManage(void) {
         break;
 
     case MODE_MANU:
+        // Serial.print("STATE SWTICH: ");
+        // Serial.print(!Switch.ControlMode);
+        // Serial.print(!Switch.EndStop);
+        // Serial.print(!Switch.MotorEnable);
+        // Serial.print(Switch.HomingOk);
         if (!Switch.ControlMode && !Switch.EndStop && !Switch.MotorEnable && Switch.HomingOk) {
             BufferFlush();
             ENABLE_T5_ISR();

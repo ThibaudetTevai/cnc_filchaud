@@ -28,7 +28,7 @@
   #define TEXT1 "Lim Chauffe = "
   #define TEXT2 "Lim Cutter = "
   #define TEXT3 "Potentiometre Chauf."
-  #define TEXT4 "Encodeur Chauffe"
+  #define TEXT4 " Encodeur Chauffe"
   #define TEXT5 "Test du Buzzer   "
   #define TEXT6 "Test des inter."
   #define TEXT7 "Mettre Mode en manu "
@@ -59,6 +59,11 @@
   #define TITLE_MENU  "MODE E MOT WIRE  CUT"
   #define TITLE_FDC   "  X1   Y1   X2   Y2"
   #define TITLE_VAR   "             0%   0%"
+  #define TITLE_VAR2  "  0.00mm/s    %     "
+
+  #define MM_STEP     "mm/step "
+
+  #define TITLE_JEDICUT  "  JediCut-Alden USB"
 #endif        
 
 // I suggest the following as they read better in English
@@ -66,7 +71,7 @@
   #define TEXT1 "Heat Limit = "
   #define TEXT2 "Cutter Limit = "
   #define TEXT3 "Heat->Potentiometer "
-  #define TEXT4 "Heat->Encoder       "
+  #define TEXT4 " Heat->Encoder       "
   #define TEXT5 "Buzzer test         "
   #define TEXT6 "Switch test         "
   #define TEXT7 "Move Mode to manual "
@@ -93,6 +98,15 @@
   #define DIS " DIS"
   #define PC_STATUS " PC "
   #define ON_STATUS " ON"
+
+  #define TITLE_MENU  "MODE E MOT WIRE  CUT"
+  #define TITLE_FDC   "  X1   Y1   X2   Y2"
+  #define TITLE_VAR   "             0%   0%"
+  #define TITLE_VAR2  "  0.00mm/s    %     "
+
+  #define MM_STEP     "mm/step "
+
+  #define TITLE_JEDICUT  " JediCut-Alden USB"
 #endif
 
 #endif                 

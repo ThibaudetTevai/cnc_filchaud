@@ -256,6 +256,10 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 U8GLIB_ST7920_128X64_1X u8g(23, 17, 16); // SPI Com: SCK = en = 23, MOSI = rw = 17, CS = di = 16  RepRap Discount Full Graphic Smart Controller - RAMPS
 LcdMatrix lcdMatrix;
 RotBtn rotBtn(PINA_MAT, PINB_MAT, PINS_MAT);
+bool lcdUpdated = false;
+
+static int buffSerial[1000];
+uint8_t cntBuff = 0;
 
 //LCD declaration
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -552,7 +556,6 @@ void setup(void) {
     //Al>
     AideMiseServiceFdc(); // aide à la mise en service des fins de course
     //<
-    Serial.println("Setup Ended");
 }
 
 //==============================================================================
@@ -1220,7 +1223,7 @@ ISR(TIMER5_COMPA_vect) {
 /*ISR(USART0_RX_vect)*/
 void serialEvent() {
     while (Serial.available()) {
-        if (modeState == MODE_PC) ComParse(Serial.read());
+        if (modeState == MODE_PC && cntBuff<1000) buffSerial[cntBuff++] = Serial.read();
     }
 }
 
@@ -1326,7 +1329,16 @@ inline void DataProcess(unsigned char * data) {
 
 /**********************************************************************************/
 
+inline void ComProcess(){
+    if(cntBuff<=0) return;
+    for (size_t i = 0; i < cntBuff ; i++){
+        ComParse(buffSerial[i]);
+    }
+    cntBuff = 0;
+}
+
 inline void ComParse(unsigned char data) {
+    
     static byte i = 0;
     static unsigned char Cmd[CMD_DATA_SIZE];
     static byte CmdSize = 0; 
@@ -1402,7 +1414,8 @@ void printLCD(uint8_t col, uint8_t row,
     const char * s) {
     
     #ifdef MATRIX_LCD
-      Serial.println(s);
+      //Serial.println(s);
+      lcdUpdated = true;
       lcdMatrix.printLcd(col, row, s);
     #else
       lcd.setCursor(col, row);
@@ -1417,7 +1430,18 @@ void printLCD_I(uint8_t col, uint8_t row, const char * s) {
     #ifdef MATRIX_LCD
         // Print imidialty -> You must use this methode
         // before a Do/While
-        lcdMatrix.printMatrix(); 
+        printMatrix(); 
+    #endif
+}
+
+/*********************************************************************************/
+
+void printMatrix() {
+    #ifdef MATRIX_LCD
+        if(lcdUpdated) {
+            lcdMatrix.printMatrix();
+            lcdUpdated = false;
+        }
     #endif
 }
 
@@ -1742,10 +1766,11 @@ inline void ModeManage(void) {
 /**** The main loop                                                           *****/
 /**********************************************************************************/
 void loop(void) {
+    ComProcess();
     GetSwitchStatus();
     StepperDriverManage();
     PauseManage();
     ModeManage();
     HMI_Manage();
-    lcdMatrix.printMatrix();
+    printMatrix(); 
 }

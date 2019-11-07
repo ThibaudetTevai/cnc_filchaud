@@ -1754,6 +1754,11 @@ inline void ModeManage(void) {
     }
 }
 
+void togglePin() {
+  if(digitalRead(PIN_DEBUG1) == HIGH) digitalWrite(PIN_DEBUG1, LOW);
+  else digitalWrite(PIN_DEBUG1, HIGH);
+}
+
 /**********************************************************************************/
 /**** The main loop                                                           *****/
 /**********************************************************************************/
@@ -1764,4 +1769,5 @@ void loop(void) {
     ModeManage();
     HMI_Manage();
     printMatrix();
+    togglePin();
 }

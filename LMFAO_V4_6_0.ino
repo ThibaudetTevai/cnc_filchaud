@@ -66,14 +66,14 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/iom2560.h>
-#include <LiquidCrystal.h>
 
 /* Internal header */
 #include "conf.h"
 #include "lang.h"
-#include "lcdMatrix.h"
-#include "rotBtn.h"
-#include "utility.h"
+#include "lcd/128x64/lcdMatrix.h"
+#include "lcd/20x04/LiquidCrystal.h"
+#include "rotBtn/rotBtn.h"
+#include "utils/utility.h"
 
 
 /* DEFINE */
@@ -95,6 +95,8 @@
 #else
   #error "Missing or invalide Baudrate value in Conf.h" // Baud rate value configured with wrong value or missing declaration in Conf.h
 #endif
+
+#define BAUDRATE_R ((F_CPU)/(BAUDRATE*8UL)-1)
 
 #define PIN_DEBUG1 13
 #define PIN_DEBUG2 19
@@ -420,10 +422,12 @@ int maPreset;
 /**********************************************************************************/
 void setup(void) {
     //serial com Initialization
-    UBRR0 = UBRR0_BAUDRATE_VALUE;   // Configure USART Clock register
-    UCSR0A = 0x02;          //
-    UCSR0B = 0x18;          //
-    UCSR0C = 0x06;          //
+    UCSR0A |= (1 << U2X0);   // double transmission speed  
+    UCSR0B |= (1 << RXCIE0) | (1 << TXEN0) | (1 << RXEN0); //enable transmitter, receiver, enable receive complete interrupt       
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); /* 8 data bits, 1 stop bit */
+    UBRR0H = (BAUDRATE_R>>8);  // shift the register right by 8 bits to get the upper 8 bits
+    UBRR0L = BAUDRATE_R;       // Configure USART Clock register
+    SREG |= 0x80; //set global interrupt enable bit
 
     // pins Initialization
 
@@ -1225,8 +1229,6 @@ ISR(TIMER5_COMPA_vect) {
 
 ISR(USART0_RX_vect)
 {
-    
-  TX_WRITE('x');
   digitalWrite(PIN_DEBUG4, HIGH);
   ComParse();
   digitalWrite(PIN_DEBUG4, LOW);
@@ -1754,11 +1756,6 @@ inline void ModeManage(void) {
     }
 }
 
-void togglePin() {
-  if(digitalRead(PIN_DEBUG1) == HIGH) digitalWrite(PIN_DEBUG1, LOW);
-  else digitalWrite(PIN_DEBUG1, HIGH);
-}
-
 /**********************************************************************************/
 /**** The main loop                                                           *****/
 /**********************************************************************************/
@@ -1769,5 +1766,4 @@ void loop(void) {
     ModeManage();
     HMI_Manage();
     printMatrix();
-    togglePin();
 }

@@ -83,7 +83,7 @@ Mettre la même valeur que pour Jedicut.
 /*=============================================================================
 Ces paramètres déterminent les différents types de séquence Homing
 */
-#define SEQ_HOMING 0 // "1" sequence Homing active, "0"  Pas de sequence Homing
+#define SEQ_HOMING 1 // "1" sequence Homing active, "0"  Pas de sequence Homing
 #define POS_SECU_Y 1  // "1" exécute une remonté des Y avant le homing
 #define MM_POS_SECU_Y 2 // valeur de remonté des Y de x mm avant le homing
 #define PREPOS 1 // "1" Pré-positionnemnt après homing permis, "0" pas de 

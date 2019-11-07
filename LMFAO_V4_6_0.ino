@@ -55,7 +55,7 @@
   EngineX1 Direction     6                                 33  (PC4)
   EngineX2 Direction     7                                 32  (PC5)
   EngineY1 Direction     8                                 31  (PC6)
-  EngineY2 Direction     9                                 30  (PC7)
+  EngineY2 Direction     9                                 30  (TC7)
 
   All Engines On/Off     -                                 10  (PB4)
   Heating On/off         -                                 35  (PC2)
@@ -67,7 +67,6 @@
 #include <avr/io.h>
 #include <avr/iom2560.h>
 #include <LiquidCrystal.h>
-#include <SoftwareSerial.h>
 
 /* Internal header */
 #include "conf.h"
@@ -239,13 +238,19 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 #define HIGH_BYTE 1
 #define LOW_BYTE 0
 
+
+#define ENABLE_RX_ISR() UCSR0B |= 0x90
 #define ENABLE_T1_ISR() TIMSK1 = 0x02
 #define ENABLE_T5_ISR() TIMSK5 = 0x02
 #define ENABLE_T2_ISR() TIMSK2 = 0x02
 
+#define DISABLE_RX_ISR() UCSR0B &= 0x6F
 #define DISABLE_T1_ISR() TIMSK1 = 0x00
 #define DISABLE_T5_ISR() TIMSK5 = 0x00
 #define DISABLE_T2_ISR() TIMSK2 = 0x00
+
+#define TX_WRITE(x) UDR0 = x
+#define RX_READ(x) x = UDR0
 
 #define ENABLE_T2_COMP_OUTPUT_B() TCCR2A |= 0x20
 #define DISABLE_T2_COMP_OUTPUT_B() TCCR2A &= 0xCF
@@ -253,13 +258,8 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 //#define DISABLE_T4_COMP_OUTPUT_C() TCCR4A &= 0xF3
 
 //MATRIX declaration
-U8GLIB_ST7920_128X64_1X u8g(23, 17, 16); // SPI Com: SCK = en = 23, MOSI = rw = 17, CS = di = 16  RepRap Discount Full Graphic Smart Controller - RAMPS
 LcdMatrix lcdMatrix;
 RotBtn rotBtn(PINA_MAT, PINB_MAT, PINS_MAT);
-bool lcdUpdated = false;
-
-static int buffSerial[1000];
-uint8_t cntBuff = 0;
 
 //LCD declaration
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -420,13 +420,16 @@ int maPreset;
 /**********************************************************************************/
 void setup(void) {
     //serial com Initialization
-    Serial.begin(115200);
-    while (!Serial);
+    UBRR0 = UBRR0_BAUDRATE_VALUE;   // Configure USART Clock register
+    UCSR0A = 0x02;          //
+    UCSR0B = 0x18;          //
+    UCSR0C = 0x06;          //
+
     // pins Initialization
 
     //LCD
     #ifdef MATRIX_LCD 
-        lcdMatrix.setup(Serial);
+        lcdMatrix.setup();
     #endif
 
     pinMode(PIN_BUZZER, OUTPUT);
@@ -437,7 +440,7 @@ void setup(void) {
     digitalWrite(PIN_RELAY_HEATING, LOW); // Off
 
     pinMode(PIN_WIRE_PWM, OUTPUT); // PWM pin for wire heating
-    pinMode(PIN_CUTTER_PWM, OUTPUT); // PWM pin for the cutter
+    pinMode(PIN_CUTTER_PWM, OUTPUT); //$PWM pin for the cutter
 
     pinMode(PIN_POT_WIRE, INPUT); // Analog input for wire heat consign potentiometer
     pinMode(PIN_POT_CUTTER, INPUT); // Analog input for Cutter hea[ consign potentiometer
@@ -1220,11 +1223,13 @@ ISR(TIMER5_COMPA_vect) {
 
 /**********************************************************************************/
 
-/*ISR(USART0_RX_vect)*/
-void serialEvent() {
-    while (Serial.available()) {
-        if (modeState == MODE_PC && cntBuff<1000) buffSerial[cntBuff++] = Serial.read();
-    }
+ISR(USART0_RX_vect)
+{
+    
+  TX_WRITE('x');
+  digitalWrite(PIN_DEBUG4, HIGH);
+  ComParse();
+  digitalWrite(PIN_DEBUG4, LOW);
 }
 
 /**********************************************************************************/
@@ -1232,7 +1237,7 @@ void serialEvent() {
 void BufferFlush(void) {
     CommandCounter = 0;
     ComOverflow = false;
-    Serial.println('C');
+    TX_WRITE('C');
     CommandIndexRead = 0;
     CommandIndexWrite = 0;
     ParserState = PARSER_STATE_CMD;
@@ -1256,7 +1261,7 @@ inline void CheckComBufferOverflow(void) {
     if ((CommandCounter >= COM_BUFFER_OVERFLOW_TRIGGER) && (!ComOverflow)) {
         ComOverflow = true;
         digitalWrite(PIN_DEBUG2, HIGH);
-        Serial.println('S');
+        TX_WRITE('S');
     }
 }
 
@@ -1266,7 +1271,7 @@ inline void CheckComBufferUnderflow(void) {
     if ((CommandCounter <= COM_BUFFER_UNDERFLOW_TRIGGER) && (ComOverflow)) {
         ComOverflow = false;
         digitalWrite(PIN_DEBUG2, LOW);
-        Serial.println('C');
+        TX_WRITE('C');
     }
 }
 
@@ -1329,47 +1334,44 @@ inline void DataProcess(unsigned char * data) {
 
 /**********************************************************************************/
 
-inline void ComProcess(){
-    if(cntBuff<=0) return;
-    for (size_t i = 0; i < cntBuff ; i++){
-        ComParse(buffSerial[i]);
-    }
-    cntBuff = 0;
-}
+inline void ComParse (void)
+{
+  static byte i = 0;
+  static unsigned char Cmd[CMD_DATA_SIZE];
+  static byte CmdSize = 0;
+  unsigned char data;
 
-inline void ComParse(unsigned char data) {
-    
-    static byte i = 0;
-    static unsigned char Cmd[CMD_DATA_SIZE];
-    static byte CmdSize = 0; 
-    switch (ParserState) {
-      case PARSER_STATE_CMD:
-          if ((data == 'A') || (data == 'H') || (data == 'M')) {
-              Cmd[0] = data;
-              i = 1;
-              CmdSize = TWO_BYTE_CMD;
-              ParserState = PARSER_STATE_DATA;   
-          } else if ((data == 'F') || (data == 'P')) {
-              Cmd[0] = data;
-              i = 1;
-              CmdSize = THREE_BYTE_CMD;
-              ParserState = PARSER_STATE_DATA;
-          }
-          break;
+  RX_READ(data);
+  switch (ParserState)
+  {
+    case PARSER_STATE_CMD:
+      if((data == 'A') || (data == 'H') || (data == 'M')){
+        Cmd[0] = data;
+        i = 1;
+        CmdSize = TWO_BYTE_CMD;
+        ParserState = PARSER_STATE_DATA;
+      }
+      else if((data == 'F')|| (data == 'P')){
+        Cmd[0] = data;
+        i = 1;
+        CmdSize = THREE_BYTE_CMD;
+        ParserState = PARSER_STATE_DATA;
+      }
+      break;
 
-      case PARSER_STATE_DATA:
-          Cmd[i++] = data;
-          if (i >= CmdSize) {
-              DataProcess(Cmd);
-              CmdBufferWrite(Cmd);
-              i = 0;
-              ParserState = PARSER_STATE_CMD;
-          }
-          break;
+    case PARSER_STATE_DATA:
+      Cmd[i++] = data;
+      if(i >= CmdSize){
+        DataProcess(Cmd);
+        CmdBufferWrite(Cmd);
+        i = 0;
+        ParserState = PARSER_STATE_CMD;
+      }
+      break;
 
-      default:
-          break;
-    }
+    default:
+      break;
+  }
 }
 
 /**********************************************************************************/
@@ -1414,8 +1416,6 @@ void printLCD(uint8_t col, uint8_t row,
     const char * s) {
     
     #ifdef MATRIX_LCD
-      //Serial.println(s);
-      lcdUpdated = true;
       lcdMatrix.printLcd(col, row, s);
     #else
       lcd.setCursor(col, row);
@@ -1438,10 +1438,7 @@ void printLCD_I(uint8_t col, uint8_t row, const char * s) {
 
 void printMatrix() {
     #ifdef MATRIX_LCD
-        if(lcdUpdated) {
-            lcdMatrix.printMatrix();
-            lcdUpdated = false;
-        }
+        if(lcdMatrix.isupdated()) lcdMatrix.printMatrix();
     #endif
 }
 
@@ -1725,11 +1722,6 @@ inline void ModeManage(void) {
         break;
 
     case MODE_MANU:
-        // Serial.print("STATE SWTICH: ");
-        // Serial.print(!Switch.ControlMode);
-        // Serial.print(!Switch.EndStop);
-        // Serial.print(!Switch.MotorEnable);
-        // Serial.print(Switch.HomingOk);
         if (!Switch.ControlMode && !Switch.EndStop && !Switch.MotorEnable && Switch.HomingOk) {
             BufferFlush();
             ENABLE_T5_ISR();
@@ -1766,11 +1758,10 @@ inline void ModeManage(void) {
 /**** The main loop                                                           *****/
 /**********************************************************************************/
 void loop(void) {
-    ComProcess();
     GetSwitchStatus();
     StepperDriverManage();
     PauseManage();
     ModeManage();
     HMI_Manage();
-    printMatrix(); 
+    printMatrix();
 }

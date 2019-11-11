@@ -8,15 +8,6 @@ enum Mode
     MODE_PC
 };
 
-enum RotaryEncoderState
-{
-    UNCHANGED = 0,
-    POSITIF,
-    NEGATIF
-};
-
-//const byte rotaryEncoderTable[16] = {UNCHANGED, POSITIF, NEGATIF, UNCHANGED, POSITIF, UNCHANGED, UNCHANGED, NEGATIF, NEGATIF, UNCHANGED, UNCHANGED, POSITIF, UNCHANGED, POSITIF, NEGATIF, UNCHANGED};
-
 enum ParseState
 {
     PARSER_STATE_CMD = 0,

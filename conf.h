@@ -22,7 +22,7 @@
 // millimeter per Step
 // Example 1: Stepper Driver setting: Full Step, Stepper Motor: 400 steps per revolution, M6 Lead screw: 1mm thread => (mm per revolution * driver setting) / step per revolution = (1*1)/400 = 0.0025
 // Ecxample 2: Stepper Driver Setting: 1/8 Step, Stepper Motor: 200 steps per revolution, Belt: 2mm between teeth, Pulley: 20 teeth => (Pulley teeth * Belt teeth interspace * driver setting) / step per revolution = (20*2*1/8)/200 = 0.025
-#define MM_PER_STEP 0.0025
+#define MM_PER_STEP 0.0125
 
 // Limite de puissance Cutter: cutter 6V alimenté en 12v PWM à 50%
 #define MAX_PERCENTAGE_CUTTER 75
@@ -32,8 +32,8 @@
 
 // Choix entre Potentiomètre  et encodeur pour le chauffe du fil en manuel
 // Mettre POT_CHAUF "1" pour le potentiomètre, Mettre POT_CHAUF 0 pour l'encodeur
-//#define HEAT_CONSIGN_ROTARY_ENCODER
-#define HEAT_CONSIGN_POTENTIOMETER
+#define HEAT_CONSIGN_ROTARY_ENCODER
+//#define HEAT_CONSIGN_POTENTIOMETER
 
 // Mettre ON_BUZZER "1" pour Alarme sonore fin de course,"0" pas d'alarme sonore
 #define BUZZER_ON 0
@@ -77,8 +77,8 @@ Pas par step : 400steps par tour, vis M6 au pas de 1mm --> 1/400 = 0.0025
 Mettre la même valeur que pour Jedicut.
 */
 //#define PAS_STEP 0.0025 
-#define VIT_RECH_FDC 4.50 // Vitesse de recherche fdc en mm/s Format XX.XX
-#define VIT_AJUST_FDC 1.00  // Vitesse d'ajustement fdc en mm/s Format XX.XX
+#define VIT_RECH_FDC 100 // Vitesse de recherche fdc en mm/s Format XX.XX
+#define VIT_AJUST_FDC 30  // Vitesse d'ajustement fdc en mm/s Format XX.XX
 
 /*=============================================================================
 Ces paramètres déterminent les différents types de séquence Homing

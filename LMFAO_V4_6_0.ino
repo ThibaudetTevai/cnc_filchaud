@@ -75,28 +75,27 @@
 #include "rotBtn/rotBtn.h"
 #include "utils/utility.h"
 
-
 /* DEFINE */
 
 #if BAUDRATE == 9600
-  #define UBRR0_BAUDRATE_VALUE 207 // Value for USART clock register for 9600 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
-#elif  BAUDRATE == 14400
-  #define UBRR0_BAUDRATE_VALUE 138 // Value for USART clock register for 14400 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 207 // Value for USART clock register for 9600 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#elif BAUDRATE == 14400
+#define UBRR0_BAUDRATE_VALUE 138 // Value for USART clock register for 14400 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #elif BAUDRATE == 19200
-  #define UBRR0_BAUDRATE_VALUE 103 // Value of USART clock register for 19200 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 103 // Value of USART clock register for 19200 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #elif BAUDRATE == 38400
-  #define UBRR0_BAUDRATE_VALUE 51 // Value of USART clock register for 38400 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 51 // Value of USART clock register for 38400 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #elif BAUDRATE == 57600
-  #define UBRR0_BAUDRATE_VALUE 34 // Value of USART clock register for 57600 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 34 // Value of USART clock register for 57600 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #elif BAUDRATE == 115200
-  #define UBRR0_BAUDRATE_VALUE 16 // Value of USART clock register for 115200 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 16 // Value of USART clock register for 115200 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #elif BAUDRATE == 250000
-  #define UBRR0_BAUDRATE_VALUE 7  // Value of USART clock register for 250000 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
+#define UBRR0_BAUDRATE_VALUE 7 // Value of USART clock register for 250000 Baud with Fosc = 16MHz (cf. Atmega2560 datasheet)
 #else
-  #error "Missing or invalide Baudrate value in Conf.h" // Baud rate value configured with wrong value or missing declaration in Conf.h
+#error "Missing or invalide Baudrate value in Conf.h" // Baud rate value configured with wrong value or missing declaration in Conf.h
 #endif
 
-#define BAUDRATE_R ((F_CPU)/(BAUDRATE*8UL)-1)
+#define BAUDRATE_R ((F_CPU) / (BAUDRATE * 8UL) - 1)
 
 #define PIN_DEBUG1 13
 #define PIN_DEBUG2 19
@@ -104,59 +103,59 @@
 #define PIN_DEBUG4 7
 
 // stepper driver
-#define DRIVER_X1_DIR_MASK 0x10     // Direction mask
+#define DRIVER_X1_DIR_MASK 0x10 // Direction mask
 #define DRIVER_X2_DIR_MASK 0x20
 #define DRIVER_Y1_DIR_MASK 0x40
 #define DRIVER_Y2_DIR_MASK 0x80
 
-#define DRIVER_X1_STEP_MASK 0x01    // Step Mask
+#define DRIVER_X1_STEP_MASK 0x01 // Step Mask
 #define DRIVER_X2_STEP_MASK 0x02
 #define DRIVER_Y1_STEP_MASK 0x04
 #define DRIVER_Y2_STEP_MASK 0x08
 
-#define PIN_X1_DIR A1           // PF1, X1 Direction
-#define PIN_X2_DIR A7           // PF7, X2 Direction
-#define PIN_Y1_DIR 28           // PA6, Y1 Direction.
-#define PIN_Y2_DIR 34           // PC3, Y2 Direction
+#define PIN_X1_DIR A1 // PF1, X1 Direction
+#define PIN_X2_DIR A7 // PF7, X2 Direction
+#define PIN_Y1_DIR 28 // PA6, Y1 Direction.
+#define PIN_Y2_DIR 34 // PC3, Y2 Direction
 
-#define PIN_X1_STEP A0          // PF0, X1 Step
-#define PIN_X2_STEP A6          // PF6, X2 Step
-#define PIN_Y1_STEP 26          // PA4, Y1 Step
-#define PIN_Y2_STEP 36          // PC1, Y2 Step
-#define PIN_TEST_STEP 11        // Interrupt frequency test pin
+#define PIN_X1_STEP A0   // PF0, X1 Step
+#define PIN_X2_STEP A6   // PF6, X2 Step
+#define PIN_Y1_STEP 26   // PA4, Y1 Step
+#define PIN_Y2_STEP 36   // PC1, Y2 Step
+#define PIN_TEST_STEP 11 // Interrupt frequency test pin
 
-#define PIN_X1_EN 38            // PD7, X1 Enable
-#define PIN_X2_EN A2            // PF2, X2 Enable
-#define PIN_Y1_EN 24            // PA2, Y1 Enable
-#define PIN_Y2_EN 30            // PC7, Y2 Enable
+#define PIN_X1_EN 38 // PD7, X1 Enable
+#define PIN_X2_EN A2 // PF2, X2 Enable
+#define PIN_Y1_EN 24 // PA2, Y1 Enable
+#define PIN_Y2_EN 30 // PC7, Y2 Enable
 
-#define MAX_FEEDRATE_TIMER_VALUE 32767  // Maximum Timer Period for low speed
-#define MIN_FEEDRATE_TIMER_VALUE 25   // Minimum Timer Period for high speed
-#define MAX_PAUSE_VALUE 65535 // Maximum de temps de pause
-#define MIN_PAUSE_VALUE 0   // Minimum de temps de pause
+#define MAX_FEEDRATE_TIMER_VALUE 32767 // Maximum Timer Period for low speed
+#define MIN_FEEDRATE_TIMER_VALUE 25    // Minimum Timer Period for high speed
+#define MAX_PAUSE_VALUE 65535          // Maximum de temps de pause
+#define MIN_PAUSE_VALUE 0              // Minimum de temps de pause
 
 #define MM_PER_SECONDE 62500.0 * MM_PER_STEP
 
 // LCD
-#define PIN_LCD_RS 16             // LCD control and is connected into GADGETS3D  shield LCDRS
-#define PIN_LCD_E 17              // LCD enable pin and is connected into GADGETS3D shield LCDE
-#define PIN_LCD_D4 23             // LCD signal pin, connected to Gadgets3D shield LCD4
-#define PIN_LCD_D5 25             // LCD signal pin, connected to Gadgets3D shield LCD5
-#define PIN_LCD_D6 27             // LCD signal pin, connected to Gadgets3D shield LCD6
-#define PIN_LCD_D7 29             // LCD signal pin, connected to Gadgets3D shield LCD7
-#define LCD_COLUMN_COUNT 20       // 20 character per line
-#define LCD_LINE_COUNT 4          // 4 lines
+#define PIN_LCD_RS 16                 // LCD control and is connected into GADGETS3D  shield LCDRS
+#define PIN_LCD_E 17                  // LCD enable pin and is connected into GADGETS3D shield LCDE
+#define PIN_LCD_D4 23                 // LCD signal pin, connected to Gadgets3D shield LCD4
+#define PIN_LCD_D5 25                 // LCD signal pin, connected to Gadgets3D shield LCD5
+#define PIN_LCD_D6 27                 // LCD signal pin, connected to Gadgets3D shield LCD6
+#define PIN_LCD_D7 29                 // LCD signal pin, connected to Gadgets3D shield LCD7
+#define LCD_COLUMN_COUNT 20           // 20 character per line
+#define LCD_LINE_COUNT 4              // 4 lines
 #define LCD_NEW_DIGIT_DISPLAY_COUNT 6 // Number of timer 2 interrupt to generate a new LCD display
 
 // PWM
-#define PIN_WIRE_PWM 8 //Sortie de cde de chauffage di fil
+#define PIN_WIRE_PWM 8   //Sortie de cde de chauffage di fil
 #define PIN_CUTTER_PWM 9 //Sortie de cde de chauffage di fil
 
 //PIN
-#define PIN_SWITCH_CONTROL_MODE 40 //Interrupteur de selection PC ou Manu "0" PC
-#define PIN_SWITCH_MOTOR A9 //Interrupteur des moteur PAP "0" ON
-#define PIN_SWITCH_HEATING_PC 44 //Interrupteur de Chauffage fil "0" PC
-#define PIN_SWITCH_HEATING_MANU A10 //Interrupteur de Chauffage Manuel fil "0" M
+#define PIN_SWITCH_CONTROL_MODE 40    //Interrupteur de selection PC ou Manu "0" PC
+#define PIN_SWITCH_MOTOR A9           //Interrupteur des moteur PAP "0" ON
+#define PIN_SWITCH_HEATING_PC 44      //Interrupteur de Chauffage fil "0" PC
+#define PIN_SWITCH_HEATING_MANU A10   //Interrupteur de Chauffage Manuel fil "0" M
 #define PIN_SWITCH_HEATING_CUTTER A12 //Interrupteur de Chauffage Dutter "0" ON
 //Al>
 //#define PIN_PUSHBUTTON_SHUNT_ENDSTOP 42 // Bouton poussoir de shunt fin de course pour redémarrer
@@ -165,21 +164,21 @@
 //Al>
 //#define PIN_ENDSTOP_MINI 14 //Somme des 4 fdc mini en série "0" fdc non sollicité
 //<
-#define PIN_POT_WIRE A5 //potentiomètre chauffage fil
+#define PIN_POT_WIRE A5    //potentiomètre chauffage fil
 #define PIN_POT_CUTTER A11 //potentiomètre chauffage cutter electrique
 
-#define PIN_ROTARY_ENCODER_A 31         // Rotary Encoder Channel A
-#define PIN_ROTARY_ENCODER_B 33         // Rotary Encoder Channel B
-#define PIN_ROTARY_ENCODER_PUSHBUTTON 35    // Rotary Encoder Channel Push Button
-#define PIN_BUZZER 37             // Beeper is Connected into GADGETS3D shield MEGA_18BEEPER
+#define PIN_ROTARY_ENCODER_A 31          // Rotary Encoder Channel A
+#define PIN_ROTARY_ENCODER_B 33          // Rotary Encoder Channel B
+#define PIN_ROTARY_ENCODER_PUSHBUTTON 35 // Rotary Encoder Channel Push Button
+#define PIN_BUZZER 37                    // Beeper is Connected into GADGETS3D shield MEGA_18BEEPER
 
-#define PIN_X1_LIMIT 3 // "0" fdc X1 non sollicité ; "1" avec inversion fdc
-#define PIN_Y1_LIMIT 2 // "0" fdc Y1 non sollicité ; "1" avec inversion fdc
+#define PIN_X1_LIMIT 3  // "0" fdc X1 non sollicité ; "1" avec inversion fdc
+#define PIN_Y1_LIMIT 2  // "0" fdc Y1 non sollicité ; "1" avec inversion fdc
 #define PIN_X2_LIMIT 15 // "0" fdc X2 non sollicité ; "1" avec inversion fdc
 #define PIN_Y2_LIMIT 14 // "0" fdc Y2 non sollicité ; "1" avec inversion fdc
 
 // Mot de la lecture des fins de course 0b 0,0,0,0,fdcY2,fdcY1,fdcX2,fdcX1
-byte mask_limits; // Résultat de la lecture des fins de courses
+byte mask_limits;  // Résultat de la lecture des fins de courses
 byte Val_X1_Limit; // "0" fdc X1 non sollicité
 byte Val_Y1_Limit; // "0" fdc Y1 non sollicité
 byte Val_X2_Limit; // "0" fdc X2 non sollicité
@@ -187,9 +186,8 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 
 #define PIN_BP_HOMING 42 // Bouton poussoir de homing
 
-
 // Command Buffer
-#define CMD_DATA_SIZE 4  // Size of the Command data in byte (= 4 byte) !! Shall be even number (2, 4, 6, etc..) !!
+#define CMD_DATA_SIZE 4     // Size of the Command data in byte (= 4 byte) !! Shall be even number (2, 4, 6, etc..) !!
 #define CMD_BUFFER_SIZE 260 // Number of Command the Buffer can stock
 #define CMD_BUFFER_MAX 255
 
@@ -200,7 +198,6 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 
 #define TWO_BYTE_CMD 2
 #define THREE_BYTE_CMD 3
-
 
 // Switch
 
@@ -240,7 +237,6 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 #define HIGH_BYTE 1
 #define LOW_BYTE 0
 
-
 #define ENABLE_RX_ISR() UCSR0B |= 0x90
 #define ENABLE_T1_ISR() TIMSK1 = 0x02
 #define ENABLE_T5_ISR() TIMSK5 = 0x02
@@ -278,42 +274,38 @@ const byte heatPercentToPWMConvTab[101] = {
     153, 156, 159, 161, 164, 166, 169, 171, 174, 176, 179, 182, 184,
     187, 189, 192, 194, 197, 199, 202, 204, 207, 210, 212, 215, 217,
     220, 222, 225, 227, 230, 233, 235, 238, 240, 243, 245, 248, 250,
-    253, 255
-};
+    253, 255};
 
 const bool StepperDriverEnableTab[2][2] = {
-    {
-        ON,
-        ON
-    },
-    {
-        OFF,
-        ON
-    }
-};
+    {ON,
+     ON},
+    {OFF,
+     ON}};
 const bool StepperDriverEnableState[2] = {
     STEPPER_DRIVER_ENABLE_LOW_LEVEL,
-    STEPPER_DRIVER_ENABLE_HIGH_LEVEL
-};
+    STEPPER_DRIVER_ENABLE_HIGH_LEVEL};
 
-enum Mode {
+enum Mode
+{
     MODE_INIT = 0,
-        MODE_MANU,
-        MODE_PC
+    MODE_MANU,
+    MODE_PC
 };
 
-enum RotaryEncoderState {
+enum RotaryEncoderState
+{
     UNCHANGED = 0,
-        POSITIF,
-        NEGATIF
+    POSITIF,
+    NEGATIF
 };
 
 //const byte rotaryEncoderTable[16] = {UNCHANGED, POSITIF, NEGATIF, UNCHANGED, POSITIF, UNCHANGED, UNCHANGED, NEGATIF, NEGATIF, UNCHANGED, UNCHANGED, POSITIF, UNCHANGED, POSITIF, NEGATIF, UNCHANGED};
 
-enum ParseState {
+enum ParseState
+{
     PARSER_STATE_CMD = 0,
-        PARSER_STATE_DATA,
-        PARSER_STATE_WRITE_CMD_BUFFER
+    PARSER_STATE_DATA,
+    PARSER_STATE_WRITE_CMD_BUFFER
 };
 
 union CmdData {
@@ -321,11 +313,11 @@ union CmdData {
     unsigned char ui8[2];
 };
 
-typedef struct TypeBuffer {
+typedef struct TypeBuffer
+{
     unsigned char Cmd;
     union CmdData Data;
-}
-TBuffer;
+} TBuffer;
 
 volatile TBuffer CommandBuffer[CMD_BUFFER_SIZE];
 volatile byte CommandIndexRead = 0;
@@ -336,29 +328,33 @@ byte ComOverflow = 0;
 
 volatile byte ParserState = PARSER_STATE_CMD;
 
-volatile struct StructPC {
+volatile struct StructPC
+{
     bool Motor = OFF;
     byte Heat = 0;
     unsigned int Feedrate = 0;
     unsigned int Pause = 0;
 } PC;
 
-struct StructHeating {
+struct StructHeating
+{
     byte WireConsign = 0;
     byte CutterConsign = 0;
     byte WireDynamique = 0;
 } Heat;
 
-enum HMI_State {
+enum HMI_State
+{
     HMI_INIT_SCREEN = 0,
-        HMI_INIT_DELAY,
-        HMI_PARAMS_SCREEN,
-        HMI_PARAMS_DELAY,
-        HMI_SWITCH_SCREEN,
-        HMI_MODE_SCREEN
+    HMI_INIT_DELAY,
+    HMI_PARAMS_SCREEN,
+    HMI_PARAMS_DELAY,
+    HMI_SWITCH_SCREEN,
+    HMI_MODE_SCREEN
 };
 
-struct StructHMI {
+struct StructHMI
+{
     bool ProcessDigit = false;
     byte State = HMI_INIT_SCREEN;
     byte WireConsign = 0;
@@ -367,25 +363,25 @@ struct StructHMI {
 } HMI;
 
 #ifdef MACHINE_NAME
-  const char MachineName[sizeof(STRINGIFY(MACHINE_NAME))] = MACHINE_NAME;
+const char MachineName[sizeof(STRINGIFY(MACHINE_NAME))] = MACHINE_NAME;
 #else
-    const char * MachineName = TITLE_JEDICUT;
+const char *MachineName = TITLE_JEDICUT;
 #endif
 
 unsigned char MachineNameChar[LCD_COLUMN_COUNT];
 
 const byte SwitchStatusTab[7][2] =
-{
-    {0, 1},
-    {0, 2},
-    {0, 4},
-    {0, 8},
-    {0, 16},
-    {0, 32},
-    {0, 128}
-};
+    {
+        {0, 1},
+        {0, 2},
+        {0, 4},
+        {0, 8},
+        {0, 16},
+        {0, 32},
+        {0, 128}};
 
-struct StructSwitch {
+struct StructSwitch
+{
     bool ControlMode;
     bool MotorEnable;
     bool HeatPC;
@@ -402,7 +398,7 @@ static byte modeState;
 // Pour Homing
 
 byte Mot_Dir = 0; // Mot de commande des direction des moteurs
-byte Mot_Ck = 0; // Mot de commande des steps des moteurs
+byte Mot_Ck = 0;  // Mot de commande des steps des moteurs
 
 // Mot de commande des steps des moteurs 0b dY2,dY1,dX2,dX1,sY2,sY1,sX2,sX1
 byte h_motCkDir = 0; // pour le homing
@@ -412,7 +408,7 @@ byte h_motCkDir = 0; // pour le homing
 bool WireVitesse = 0; //ordre de correction de vitesse
 // Pour Pause
 bool ActivePause = 0;
-unsigned long kPause = 0; // millis  + pause en début de pause
+unsigned long kPause = 0;  // millis  + pause en début de pause
 unsigned long RePause = 0; // calcul de la pause restante
 unsigned long Cad_Aff = 0; //cadense affichage pause
 // Variable init timer4
@@ -420,64 +416,65 @@ int maRaz;
 int maPreset;
 
 /**********************************************************************************/
-void setup(void) {
+void setup(void)
+{
     //serial com Initialization
-    UCSR0A |= (1 << U2X0);   // double transmission speed  
-    UCSR0B |= (1 << RXCIE0) | (1 << TXEN0) | (1 << RXEN0); //enable transmitter, receiver, enable receive complete interrupt       
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); /* 8 data bits, 1 stop bit */
-    UBRR0H = (BAUDRATE_R>>8);  // shift the register right by 8 bits to get the upper 8 bits
-    UBRR0L = BAUDRATE_R;       // Configure USART Clock register
-    SREG |= 0x80; //set global interrupt enable bit
+    UCSR0A |= (1 << U2X0);                                 // double transmission speed
+    UCSR0B |= (1 << RXCIE0) | (1 << TXEN0) | (1 << RXEN0); //enable transmitter, receiver, enable receive complete interrupt
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);                /* 8 data bits, 1 stop bit */
+    UBRR0H = (BAUDRATE_R >> 8);                            // shift the register right by 8 bits to get the upper 8 bits
+    UBRR0L = BAUDRATE_R;                                   // Configure USART Clock register
+    SREG |= 0x80;                                          //set global interrupt enable bit
 
-    // pins Initialization
+// pins Initialization
 
-    //LCD
-    #ifdef MATRIX_LCD 
-        lcdMatrix.setup();
-    #endif
+//LCD
+#ifdef MATRIX_LCD
+    lcdMatrix.setup();
+#endif
 
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
 
     // Heating
-    pinMode(PIN_RELAY_HEATING, OUTPUT); // PD2, Heat Relay on/off low active for letmathe mdlcnc
+    pinMode(PIN_RELAY_HEATING, OUTPUT);   // PD2, Heat Relay on/off low active for letmathe mdlcnc
     digitalWrite(PIN_RELAY_HEATING, LOW); // Off
 
-    pinMode(PIN_WIRE_PWM, OUTPUT); // PWM pin for wire heating
+    pinMode(PIN_WIRE_PWM, OUTPUT);   // PWM pin for wire heating
     pinMode(PIN_CUTTER_PWM, OUTPUT); //$PWM pin for the cutter
 
-    pinMode(PIN_POT_WIRE, INPUT); // Analog input for wire heat consign potentiometer
+    pinMode(PIN_POT_WIRE, INPUT);   // Analog input for wire heat consign potentiometer
     pinMode(PIN_POT_CUTTER, INPUT); // Analog input for Cutter hea[ consign potentiometer
 
     // Switch
-    pinMode(PIN_SWITCH_CONTROL_MODE, INPUT); //Switch control mode PC/Manu ->  low state = mode PC / high state = mode Manu
+    pinMode(PIN_SWITCH_CONTROL_MODE, INPUT);     //Switch control mode PC/Manu ->  low state = mode PC / high state = mode Manu
     digitalWrite(PIN_SWITCH_CONTROL_MODE, HIGH); // Atmega internal Pullup Activated
 
-    pinMode(PIN_SWITCH_MOTOR, INPUT); //Switch Stepper Driver -> low state = Enabled / high state = OFF or PC control
+    pinMode(PIN_SWITCH_MOTOR, INPUT);     //Switch Stepper Driver -> low state = Enabled / high state = OFF or PC control
     digitalWrite(PIN_SWITCH_MOTOR, HIGH); // Atmega internal Pullup Activated
 
-    pinMode(PIN_SWITCH_HEATING_PC, INPUT); //Switch Wire heat mode PC -> Low state = control by PC / high state = OFF or Manu
+    pinMode(PIN_SWITCH_HEATING_PC, INPUT);     //Switch Wire heat mode PC -> Low state = control by PC / high state = OFF or Manu
     digitalWrite(PIN_SWITCH_HEATING_PC, HIGH); // Atmega internal Pullup Activated
 
-    pinMode(PIN_SWITCH_HEATING_MANU, INPUT); //Swipch Wire heat mode manu -> low state = manu / high state = OFF or PC
+    pinMode(PIN_SWITCH_HEATING_MANU, INPUT);     //Swipch Wire heat mode manu -> low state = manu / high state = OFF or PC
     digitalWrite(PIN_SWITCH_HEATING_MANU, HIGH); // Atmega internal Pullup Activated
 
-    pinMode(PIN_SWITCH_HEATING_CUTTER, INPUT); //Switch Cutter heat mode -> disable if switch control mode is on PC mode else low state = ON / high state = OFF
+    pinMode(PIN_SWITCH_HEATING_CUTTER, INPUT);     //Switch Cutter heat mode -> disable if switch control mode is on PC mode else low state = ON / high state = OFF
     digitalWrite(PIN_SWITCH_HEATING_CUTTER, HIGH); // Atmega internal Pullup Activated
 
-    pinMode(PIN_X1_LIMIT, INPUT); //Pin sfcd X1 "0" non sollicité
+    pinMode(PIN_X1_LIMIT, INPUT);     //Pin sfcd X1 "0" non sollicité
     digitalWrite(PIN_X1_LIMIT, HIGH); // Mise en servive Pullup
 
-    pinMode(PIN_Y1_LIMIT, INPUT); //Pin sfcd Y1 "0" non sollicité
+    pinMode(PIN_Y1_LIMIT, INPUT);     //Pin sfcd Y1 "0" non sollicité
     digitalWrite(PIN_Y1_LIMIT, HIGH); // Mise en servive Pullup
 
-    pinMode(PIN_X2_LIMIT, INPUT); //Pin sfcd X2 "0" non sollicité
+    pinMode(PIN_X2_LIMIT, INPUT);     //Pin sfcd X2 "0" non sollicité
     digitalWrite(PIN_X2_LIMIT, HIGH); // Mise en servive Pullup
 
-    pinMode(PIN_Y2_LIMIT, INPUT); //Pin sfcd Y2 "0" non sollicité
+    pinMode(PIN_Y2_LIMIT, INPUT);     //Pin sfcd Y2 "0" non sollicité
     digitalWrite(PIN_Y2_LIMIT, HIGH); // Mise en servive Pullup
     //Al>
-    pinMode(PIN_BP_HOMING, INPUT); //Pin BP Homing
+    pinMode(PIN_BP_HOMING, INPUT);     //Pin BP Homing
     digitalWrite(PIN_BP_HOMING, HIGH); // Mise en servive Pullup
 
     //  pinMode (PIN_ENDSTOP_MINI, INPUT); // state of the 4 endstops -> low state = All Endstops not activate / high state = at least one Endstop is activate
@@ -515,7 +512,7 @@ void setup(void) {
 
     // Timer 1 init, used to parse the communication buffer and fill the command buffer
     TIMSK1 = 0x00; // Reset interrupt flag
-    TIFR1 = 0x00; // Interrupt disabled, enabled only when there is command to execute
+    TIFR1 = 0x00;  // Interrupt disabled, enabled only when there is command to execute
     TCCR1A = 0x00; // configure timer in Clear Timer on Compare mode, disable Output Compare pins
     TCCR1B = 0x0C; // configure timer in Clear Timer on Compare mode and set prescaler to 256
     TCCR1C = 0x00;
@@ -523,11 +520,11 @@ void setup(void) {
 
     // Timer 2 init, used for Cutter Heat PWM as hardware PWM generator and as Buzzer sound generator on timer counter overflow
     TIMSK2 = 0x00; // Reset interrupt flag
-    TIFR2 = 0x00; // disable interrupt
+    TIFR2 = 0x00;  // disable interrupt
     TCCR2A = 0x03; // configure timer in Fast PWM mode, disable Output Compare pin A and enable Output Compare pin B
     TCCR2B = 0x0E; // configure timer in Fast PWM mode and set prescaler to 256
-    OCR2A = 100; // Set Top value => Fosc = 16MHz, Prescaler = 256, Compare value = 100 -> Fpwm = 1 / (100 * 256 * 62.5e-9) = 625 Hz
-    OCR2B = 0; // Set compare value => Compare value between 0 = 0% PWM and 200 = 100% PWM
+    OCR2A = 100;   // Set Top value => Fosc = 16MHz, Prescaler = 256, Compare value = 100 -> Fpwm = 1 / (100 * 256 * 62.5e-9) = 625 Hz
+    OCR2B = 0;     // Set compare value => Compare value between 0 = 0% PWM and 200 = 100% PWM
 
     /*
     // Timer 4 init, used for Wire Heat PWM as Hardware PWM generator
@@ -541,25 +538,25 @@ void setup(void) {
     */
 
     // modification frequence PWM des pin 6,)7, 8, par le timer 4  (chauffe)
-    maRaz = 7; // 111 pour CS02, CS01, CS00
+    maRaz = 7;    // 111 pour CS02, CS01, CS00
     maPreset = 2; //010 pour 7800 Hz ; 001 pour 62000Hz
     TCCR4B &= ~maRaz;
     TCCR4B |= maPreset;
 
     // Timer 5 init, used to generate steps at a constant rate
     TIMSK5 = 0x00; // Reset interrupt flag
-    TIFR5 = 0x00; // Interrupt disabled, enabled only when there is command to execute
+    TIFR5 = 0x00;  // Interrupt disabled, enabled only when there is command to execute
     TCCR5A = 0x00; // configure timer in Clear Timer on Compare mode, disable Output Compare pins
     TCCR5B = 0x0C; // configure timer in Clear Timer on Compare mode and set prescaler to 256
     TCCR5C = 0x00;
     OCR5A = 255; // Set Top value => Fosc = 16MHz (62.5 ns), Prescaler = 256, Compare value = 255 -> Fpwm = 1 / (255 * 256 * 62.5e-9) =  245 Hz
 
-    //
-    //MachineName.getBytes(MachineNameChar, LCD_COLUMN_COUNT);
-    // Switch.HomingOk = false ;  // Etat du Homing
-    #ifdef DEBUG
-      digitalWrite(13, HIGH);
-    #endif
+//
+//MachineName.getBytes(MachineNameChar, LCD_COLUMN_COUNT);
+// Switch.HomingOk = false ;  // Etat du Homing
+#ifdef DEBUG
+    digitalWrite(13, HIGH);
+#endif
     //Al>
     AideMiseServiceFdc(); // aide à la mise en service des fins de course
     //<
@@ -568,14 +565,15 @@ void setup(void) {
 //==============================================================================
 //  Test  des fins de course
 //==============================================================================
-void Test_fdc() {
-    do {
+void Test_fdc()
+{
+    do
+    {
         limits_Lect();
         Aff_Test_Fdc();
 
         Heat.WireConsign = map(analogRead(PIN_POT_WIRE), 0, 1023, 0, MAX_PERCENTAGE_WIRE);
-    }
-    while (Heat.WireConsign > 10);
+    } while (Heat.WireConsign > 10);
     limits_Lect();
 }
 //-----------------------------------------------------------------------------
@@ -584,23 +582,25 @@ void Test_fdc() {
 //==============================================================================
 // Aide à la mise en service des fins de course
 //==============================================================================
-void AideMiseServiceFdc(void) {
+void AideMiseServiceFdc(void)
+{
     Heat.WireConsign = map(analogRead(PIN_POT_WIRE), 0, 1023, 0, MAX_PERCENTAGE_WIRE);
-    if (Heat.WireConsign > 50) {
+    if (Heat.WireConsign > 50)
+    {
         Affic_Trame_fdc();
         Test_fdc();
     }
-
 }
 //------------------------------------------------------------------------------
 
 //==============================================================================
 // Affichage de la Trame Etat Fins de course
 //==============================================================================
-void Affic_Trame_fdc() {    
-    #ifndef MATRIX_LCD
-        lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
-    #endif
+void Affic_Trame_fdc()
+{
+#ifndef MATRIX_LCD
+    lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+#endif
     clearLCD();
     printLCD(0, 0, TEXT17); // " Etat fin de course"
     printLCD(0, 1, TITLE_FDC);
@@ -612,7 +612,8 @@ void Affic_Trame_fdc() {
 // Lecture des fins de course et constitution d'un mot état des fins de course
 //==============================================================================
 
-void limits_Lect() {
+void limits_Lect()
+{
     mask_limits = (((digitalRead(PIN_X1_LIMIT) ^ INV_FDC_X1) << 0) | ((digitalRead(PIN_Y1_LIMIT) ^ INV_FDC_Y1) << 2) | ((digitalRead(PIN_X2_LIMIT) ^ INV_FDC_X2) << 1) | ((digitalRead(PIN_Y2_LIMIT) ^ INV_FDC_Y2) << 3));
 
     Val_X1_Limit = bitRead(mask_limits, 0);
@@ -625,7 +626,8 @@ void limits_Lect() {
 //==============================================================================
 // Affichage de l'etat des fins de course
 //==============================================================================
-void Aff_Test_Fdc() {
+void Aff_Test_Fdc()
+{
     char val[5];
     sprintf(val, "%d", Val_X1_Limit);
     printLCD(2, 2, val);
@@ -642,17 +644,23 @@ void Aff_Test_Fdc() {
 //==============================================================================
 // Homing Manage
 //==============================================================================
-void HomingManage() {
-    if (Switch.HomingOk == false) {
-        if ((digitalRead(PIN_SWITCH_MOTOR) == LOW)) {
+void HomingManage()
+{
+    if (Switch.HomingOk == false)
+    {
+        if ((digitalRead(PIN_SWITCH_MOTOR) == LOW))
+        {
             StepperDriverEnable(ON);
             Arm_Homing();
             printLCD(0, 1, TITLE_MENU);
             GetSwitchStatus();
             HMI_ModeScreen();
         }
-    } else {
-        if (Switch.MotorEnable == 1) Desar_Homing();
+    }
+    else
+    {
+        if (Switch.MotorEnable == 1)
+            Desar_Homing();
     }
 }
 //------------------------------------------------------------------------------
@@ -660,24 +668,28 @@ void HomingManage() {
 // Armement Homing
 //==============================================================================
 
-void Arm_Homing() {
-    if (SEQ_HOMING == 1) {
+void Arm_Homing()
+{
+    if (SEQ_HOMING == 1)
+    {
         printLCD(0, 1, TEXT19);
         printLCD(0, 1, TEXT19);
         printLCD(0, 2, "C1a C1 C2 C3 C4 Ppos");
         printLCD_I(0, 3, "                    ");
-        
 
-        while ((digitalRead(PIN_BP_HOMING) == HIGH));
+        while ((digitalRead(PIN_BP_HOMING) == HIGH))
+            ;
         homing_set();
-        if (PREPOS == 1) {
+        if (PREPOS == 1)
+        {
             prepos_set();
         }
 
         printLCD(0, 1, TEXT20);
         delay(1000);
 
-        if (MOTEUR_ON_ASSERVI == 1) {
+        if (MOTEUR_ON_ASSERVI == 1)
+        {
             StepperDriverEnable(ON);
         }
         Switch.HomingOk = true;
@@ -685,7 +697,8 @@ void Arm_Homing() {
 
     // Si on ne veut pas de Homing par la config, on vient la
     // pour faire le premier passage
-    else {
+    else
+    {
         Switch.HomingOk = true;
     }
 }
@@ -694,9 +707,9 @@ void Arm_Homing() {
 //==============================================================================
 // Desarmement Homing
 //==============================================================================
-void Desar_Homing() {
+void Desar_Homing()
+{
     Switch.HomingOk = false;
-
 }
 
 //------------------------------------------------------------------------------
@@ -705,7 +718,8 @@ void Desar_Homing() {
 // Séquence Homing
 //==============================================================================
 
-void homing_set() {
+void homing_set()
+{
     printLCD(0, 1, TEXT13);
 
     cycle_1();
@@ -719,16 +733,19 @@ void homing_set() {
 // Cycle 1 Remontée des axe Y de Xmm si vous avez choisi l'option
 // Retour à zéro X1 et X2 en premier, Y1 et Y2 en second
 //==============================================================================
-void cycle_1() {
+void cycle_1()
+{
     byte tr_mask_limits = 0;
     //calcul de la tempo entre chaque step pour la vitesse d'approche
     unsigned int tempo_step = MM_PER_STEP / VIT_RECH_FDC * 1000000; //555,555
-    if (POS_SECU_Y == 1) {
+    if (POS_SECU_Y == 1)
+    {
         unsigned int Nbre_pas = MM_POS_SECU_Y / MM_PER_STEP;
 
         printLCD_I(0, 3, "===");
 
-        for (unsigned int i = Nbre_pas; i > 0; i--) {
+        for (unsigned int i = Nbre_pas; i > 0; i--)
+        {
             h_motCkDir = 0x0C; // 00001100
             ProcessStep(h_motCkDir);
             delayMicroseconds(tempo_step);
@@ -738,34 +755,35 @@ void cycle_1() {
     // Recherche fdc X1 et X2
     printLCD_I(3, 3, "==");
 
-    do {
+    do
+    {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0xFF;
         h_motCkDir = 0xF3; // 11110011
         h_motCkDir = h_motCkDir & tr_mask_limits;
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
-    }
-    while (mask_limits < 0x03);
+    } while (mask_limits < 0x03);
 
     // Recherche fdc Y1 et Y2
     printLCD_I(5, 3, "==");
-    do {
+    do
+    {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0xFF;
         h_motCkDir = 0xFC; //11111100
         h_motCkDir = h_motCkDir & tr_mask_limits;
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
-    }
-    while (mask_limits < 0x0F);
+    } while (mask_limits < 0x0F);
 }
 //------------------------------------------------------------------------------
 
 //==============================================================================
 //Cycle 2 retour hors fin de course les 4 axes en même temps
 //==============================================================================
-void cycle_2() {
+void cycle_2()
+{
 
     printLCD_I(7, 3, "==");
 
@@ -775,22 +793,23 @@ void cycle_2() {
     unsigned int tempo_step = MM_PER_STEP / VIT_AJUST_FDC * 1000000;
 
     // Avance des 4 axes jusqu'à ce que les fins de course soient sollicités
-    do {
+    do
+    {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0x00;
         h_motCkDir = 0x0F; //00001111
         h_motCkDir = h_motCkDir & tr_mask_limits;
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
-    }
-    while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
+    } while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
 }
 //------------------------------------------------------------------------------
 //==============================================================================
 // Cycle 3 : retour vers fins de course les 4 axes en même temps
 //==============================================================================
 
-void cycle_3() {
+void cycle_3()
+{
 
     printLCD_I(9, 3, "===");
 
@@ -798,22 +817,23 @@ void cycle_3() {
 
     //calcul de la tempo entre chaque step pour la vitesse lente (ajuste)
     unsigned int tempo_step = MM_PER_STEP / VIT_AJUST_FDC * 1000000;
-    do {
+    do
+    {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0xFF;
         h_motCkDir = 0xFF; //11111111
         h_motCkDir = h_motCkDir & tr_mask_limits;
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
-    }
-    while (mask_limits < 0x0F); // Sortie de la boucle les 4 fdc sont sollicités.
+    } while (mask_limits < 0x0F); // Sortie de la boucle les 4 fdc sont sollicités.
 }
 //------------------------------------------------------------------------------
 
 //==============================================================================
 // Cycle 4 : retour hors fin de course les 4 axes en même temps
 //==============================================================================
-void cycle_4() {
+void cycle_4()
+{
 
     printLCD_I(12, 3, "====");
 
@@ -822,15 +842,15 @@ void cycle_4() {
     //calcul de la tempo entre chaque step pour la vitesse lente (ajuste)
     unsigned int tempo_step = MM_PER_STEP / VIT_AJUST_FDC * 1000000;
 
-    do {
+    do
+    {
         limits_Lect();
         tr_mask_limits = mask_limits ^ 0x00;
         h_motCkDir = 0x0F; // 00001111
         h_motCkDir = h_motCkDir & tr_mask_limits;
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
-    }
-    while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
+    } while (mask_limits > 0x00); // Sortie de la boucle les 4 fdc non sollicités.
 }
 //------------------------------------------------------------------------------
 
@@ -838,7 +858,8 @@ void cycle_4() {
 // Si option "Prépositionnement" Les axes Y rejoignent les mm demandés en option
 // puis  les axes X rejoignent les mm demandés
 //==============================================================================
-void prepos_set() {
+void prepos_set()
+{
     printLCD_I(16, 3, "====");
 
     //calcul de la tempo pour la vitesse de déplacement (Grande Vitesse).
@@ -846,31 +867,35 @@ void prepos_set() {
 
     // Prepositionnement des axes Y
     unsigned int Nbre_pas = MM_PREPOS_Y / MM_PER_STEP;
-    for (unsigned int i = Nbre_pas; i > 0; i--) {
+    for (unsigned int i = Nbre_pas; i > 0; i--)
+    {
         h_motCkDir = 0x0C; // 00001100
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
     }
     // Prépositionnement des axes X
     Nbre_pas = MM_PREPOS_X / MM_PER_STEP;
-    for (unsigned int i = Nbre_pas; i > 0; i--) {
+    for (unsigned int i = Nbre_pas; i > 0; i--)
+    {
         h_motCkDir = 0x03; // 00000011
         ProcessStep(h_motCkDir);
         delayMicroseconds(tempo_step);
     }
-
 }
 //------------------------------------------------------------------------------
 
 //=====================================9========================================
 // End Stop Manage  sur une detection de End Stop en Mode Auto
 //==============================================================================
-void EndStopManage() {
-    if (Switch.HomingOk == true) {
+void EndStopManage()
+{
+    if (Switch.HomingOk == true)
+    {
         //arretPropreMachine();
 
         limits_Lect();
-        if (mask_limits > 0x00) {
+        if (mask_limits > 0x00)
+        {
             Trait_Arr_fdc();
             Desar_Homing();
         }
@@ -880,15 +905,18 @@ void EndStopManage() {
 //==============================================================================
 // Traitement d'un arrêt par fin de course
 //==============================================================================
-void Trait_Arr_fdc() {
+void Trait_Arr_fdc()
+{
     clearLCD();
     printLCD(0, 0, TEXT11);
     printLCD(0, 1, "  X1   Y1   X2   Y2");
     printLCD(0, 3, TEXT12);
     Aff_Test_Fdc(); // Inside this methode we print the matrix
-    while (digitalRead(PIN_BP_HOMING) == HIGH); //alarmSonor();
+    while (digitalRead(PIN_BP_HOMING) == HIGH)
+        ; //alarmSonor();
     SoundAlarm(OFF);
-    while (digitalRead(PIN_BP_HOMING) == LOW);
+    while (digitalRead(PIN_BP_HOMING) == LOW)
+        ;
 
     clearLCD();
     testPosIntDem();
@@ -904,40 +932,47 @@ void Trait_Arr_fdc() {
 // Au demarrage test de la position des interrupteurs ou sur arret fdc
 //==============================================================================
 
-void testPosIntDem() {
+void testPosIntDem()
+{
     printLCD(0, 2, TEXT6);
     if (digitalRead(PIN_SWITCH_CONTROL_MODE) == LOW) // test si l'inter Mode est sur Manu
     {
         printLCD_I(0, 3, TEXT7);
-        while (digitalRead(PIN_SWITCH_CONTROL_MODE) == LOW);
+        while (digitalRead(PIN_SWITCH_CONTROL_MODE) == LOW)
+            ;
     }
 
     if (digitalRead(PIN_SWITCH_MOTOR) == LOW) // test si l'inter Moteur est sur OFF
     {
         printLCD_I(0, 3, TEXT8); // "Mettre Mot. sur OFF" attente inter Moteur sur OFF
-        while (digitalRead(PIN_SWITCH_MOTOR) == LOW);
+        while (digitalRead(PIN_SWITCH_MOTOR) == LOW)
+            ;
     }
     if ((digitalRead(PIN_SWITCH_HEATING_PC == LOW) | (digitalRead(PIN_SWITCH_HEATING_MANU) == LOW))) // test si l'inter Chauffe est sur OFF
     {
         printLCD_I(0, 3, TEXT9);
-        while ((digitalRead(PIN_SWITCH_HEATING_PC) == LOW) | (digitalRead(PIN_SWITCH_HEATING_MANU) == LOW));
+        while ((digitalRead(PIN_SWITCH_HEATING_PC) == LOW) | (digitalRead(PIN_SWITCH_HEATING_MANU) == LOW))
+            ;
     }
 
     if (digitalRead(PIN_SWITCH_HEATING_CUTTER) == LOW) // test si l'inter Moteur est sur OFF
     {
         printLCD_I(0, 3, TEXT10); // "Mettre Cut sur OFF" attente inter Moteur sur OFF
-        while (digitalRead(PIN_SWITCH_HEATING_CUTTER) == LOW);
+        while (digitalRead(PIN_SWITCH_HEATING_CUTTER) == LOW)
+            ;
     }
-
 }
 //------------------------------------------------------------------------------
 
 //==============================================================================
 // Pause Manage  sur une detection de End Stop en Mode Auto
 //==============================================================================
-inline void PauseManage(void) {
-    if (ActivePause == 1) {
-        if (millis() > Cad_Aff) {
+inline void PauseManage(void)
+{
+    if (ActivePause == 1)
+    {
+        if (millis() > Cad_Aff)
+        {
             RePause = (kPause - millis()) / 1000;
             Cad_Aff = millis() + 250;
 
@@ -945,7 +980,8 @@ inline void PauseManage(void) {
             printLCD(7, 0, ftostr62rj(RePause));
         }
 
-        if (millis() > kPause) {
+        if (millis() > kPause)
+        {
             ActivePause = 0;
             kPause = 0;
             printLCD(0, 0, "                   ");
@@ -957,7 +993,8 @@ inline void PauseManage(void) {
 
 //------------------------------------------------------------------------------
 
-inline void StepperDriverDir(byte dir) {
+inline void StepperDriverDir(byte dir)
+{
     //AL >
     dir = (dir ^ INV_DIR_MASK);
     //<
@@ -969,7 +1006,8 @@ inline void StepperDriverDir(byte dir) {
 
 /**********************************************************************************/
 
-inline void StepperDriverStep(byte step) {
+inline void StepperDriverStep(byte step)
+{
     bitWrite(PORTF, 0, (step & DRIVER_X1_STEP_MASK));
     bitWrite(PORTF, 6, (step & DRIVER_X2_STEP_MASK));
     bitWrite(PORTA, 4, (step & DRIVER_Y1_STEP_MASK));
@@ -978,13 +1016,15 @@ inline void StepperDriverStep(byte step) {
 }
 
 /**********************************************************************************/
-inline void ProcessStep(byte cmd) {
+inline void ProcessStep(byte cmd)
+{
     StepperDriverDir(cmd);
     //  delayMicroseconds(1);     // wait 1 us before sending the steps
     StepperDriverStep(cmd);
 
     //Calcul compensation Chauffe artifice vitesse
-    if (CHAUFFE_ASSERV == 1) {
+    if (CHAUFFE_ASSERV == 1)
+    {
         WireVitesse = (((cmd & DRIVER_X1_STEP_MASK) && (cmd & DRIVER_Y1_STEP_MASK)) || ((cmd & DRIVER_X2_STEP_MASK) && (cmd & DRIVER_Y2_STEP_MASK)));
     }
     //  delayMicroseconds(3);     // wait 3 us before sending falling pulse for step
@@ -992,7 +1032,8 @@ inline void ProcessStep(byte cmd) {
 }
 
 /**********************************************************************************/
-inline void StepperDriverEnable(bool en) {
+inline void StepperDriverEnable(bool en)
+{
     bool enable = StepperDriverEnableState[en];
 
     StepperDriverEnableMode = en;
@@ -1008,106 +1049,150 @@ inline void StepperDriverEnable(bool en) {
 //==============================================================================
 //Gestion de la marche asservie des Drivers
 //==============================================================================
-void StepperDriverManage(void) {
-    if ((MOTEUR_ON_ASSERVI == 1)) {
-        if ((!Switch.ControlMode) && (!Switch.MotorEnable) && (StepperDriverEnableMode != PC.Motor)) {
+void StepperDriverManage(void)
+{
+    if ((MOTEUR_ON_ASSERVI == 1))
+    {
+        if ((!Switch.ControlMode) && (!Switch.MotorEnable) && (StepperDriverEnableMode != PC.Motor))
+        {
             StepperDriverEnable(PC.Motor);
-        } else {
-            if (Switch.MotorEnable) Desar_Homing();
         }
-    } else {
-        if ((Switch.MotorEnable) && (StepperDriverEnableMode != OFF)) {
+        else
+        {
+            if (Switch.MotorEnable)
+                Desar_Homing();
+        }
+    }
+    else
+    {
+        if ((Switch.MotorEnable) && (StepperDriverEnableMode != OFF))
+        {
             StepperDriverEnable(OFF); // blocage des drivers
             Desar_Homing();
-        } else {
+        }
+        else
+        {
             if ((!Switch.MotorEnable) && (StepperDriverEnableMode != ON))
                 StepperDriverEnable(ON);
         }
     }
-
 }
 //------------------------------------------------------------------------------
 /**********************************************************************************/
-void CleanMotorHalt(void) {
+void CleanMotorHalt(void)
+{
     PC.Motor = OFF;
     StepperDriverStep(OFF);
 }
 
 /**********************************************************************************/
 
-inline void HeatingRelay(byte en) {
+inline void HeatingRelay(byte en)
+{
     digitalWrite(PIN_RELAY_HEATING, en);
 }
 
 /**********************************************************************************/
 
-inline void ComputeRotaryEncoderHeatConsign(void) {
-    bool bntPressed = rotBtn.isBtnPushed(); // Get state and reset flag
+inline void ComputeRotaryEncoderHeatConsign(void)
+{
+    bool bntPressed = rotBtn.isBtnPushed();  // Get state and reset flag
     bool cntUpdated = rotBtn.isCntUpdated(); // Get state and reset flag
-    if (cntUpdated || bntPressed) {
-        if (bntPressed) Heat.WireConsign += 10 * rotBtn.getValueRot(); // x 10 the value
-        else if (cntUpdated) Heat.WireConsign += rotBtn.getValueRot(); // Value <- +1 or -1
+    if (cntUpdated || bntPressed)
+    {
+        if (bntPressed)
+            Heat.WireConsign += 10 * rotBtn.getValueRot(); // x 10 the value
+        else if (cntUpdated)
+            Heat.WireConsign += rotBtn.getValueRot(); // Value <- +1 or -1
         rotBtn.resetValueRot();
-        if (Heat.WireConsign < 0) Heat.WireConsign = 0;
-        else if (Heat.WireConsign > MAX_PERCENTAGE_WIRE) Heat.WireConsign = MAX_PERCENTAGE_WIRE;
+        if (Heat.WireConsign < 0)
+            Heat.WireConsign = 0;
+        else if (Heat.WireConsign > MAX_PERCENTAGE_WIRE)
+            Heat.WireConsign = MAX_PERCENTAGE_WIRE;
     }
 }
 
 /**************************}*******************************************************/
 
-inline void HeatingManage(byte mode) {
-    if (mode == MODE_MANU) {
-        if (!Switch.HeatManu) {
-            #ifdef HEAT_CONSIGN_ROTARY_ENCODER
-              ComputeRotaryEncoderHeatConsign();
-            #else
-                Heat.WireConsign = map(analogRead(PIN_POT_WIRE), 0, 1023, 0, 100);
-            if (Heat.WireConsign > MAX_PERCENTAGE_WIRE) Heat.WireConsign = MAX_PERCENTAGE_WIRE;
-            #endif
-        } else {
+inline void HeatingManage(byte mode)
+{
+    if (mode == MODE_MANU)
+    {
+        if (!Switch.HeatManu)
+        {
+#ifdef HEAT_CONSIGN_ROTARY_ENCODER
+            ComputeRotaryEncoderHeatConsign();
+#else
+            Heat.WireConsign = map(analogRead(PIN_POT_WIRE), 0, 1023, 0, 100);
+            if (Heat.WireConsign > MAX_PERCENTAGE_WIRE)
+                Heat.WireConsign = MAX_PERCENTAGE_WIRE;
+#endif
+        }
+        else
+        {
             Heat.WireConsign = 0;
         }
 
-        if (Switch.CutterEnable) {
+        if (Switch.CutterEnable)
+        {
             DISABLE_T2_COMP_OUTPUT_B();
             Heat.CutterConsign = 0;
             OCR2B = 0;
-        } else {
+        }
+        else
+        {
             ENABLE_T2_COMP_OUTPUT_B();
             Heat.CutterConsign = map(analogRead(PIN_POT_CUTTER), 0, 1023, 0, 100);
-            if (Heat.CutterConsign > MAX_PERCENTAGE_CUTTER) Heat.CutterConsign = MAX_PERCENTAGE_CUTTER;
+            if (Heat.CutterConsign > MAX_PERCENTAGE_CUTTER)
+                Heat.CutterConsign = MAX_PERCENTAGE_CUTTER;
             OCR2B = Heat.CutterConsign;
         }
-    } else {
-        if (!Switch.HeatPC) {
+    }
+    else
+    {
+        if (!Switch.HeatPC)
+        {
             Heat.WireConsign = PC.Heat;
-        } else if (!Switch.HeatManu) {
-          #ifdef HEAT_CONSIGN_ROTARY_ENCODER
-              ComputeRotaryEncoderHeatConsign();
-          #else
-              Heat.WireConsign = map(analogRead (PIN_POT_WIRE), 0, 1023, 0, 100);
-              if (Heat.WireConsign > MAX_PERCENTAGE_WIRE) Heat.WireConsign = MAX_PERCENTAGE_WIRE ;
-          #endif
-        } else
+        }
+        else if (!Switch.HeatManu)
+        {
+#ifdef HEAT_CONSIGN_ROTARY_ENCODER
+            ComputeRotaryEncoderHeatConsign();
+#else
+            Heat.WireConsign = map(analogRead(PIN_POT_WIRE), 0, 1023, 0, 100);
+            if (Heat.WireConsign > MAX_PERCENTAGE_WIRE)
+                Heat.WireConsign = MAX_PERCENTAGE_WIRE;
+#endif
+        }
+        else
             Heat.WireConsign = 0;
     }
 
-    if (Heat.WireConsign > 0) {
+    if (Heat.WireConsign > 0)
+    {
         HeatingRelay(ON);
         //ENABLE_T4_COMP_OUTPUT_C();
-    } else {
+    }
+    else
+    {
         HeatingRelay(OFF);
         //DISABLE_T4_COMP_OUTPUT_C();
     }
-    if ((CHAUFFE_ASSERV == 1) & (mode == MODE_PC)) {
+    if ((CHAUFFE_ASSERV == 1) & (mode == MODE_PC))
+    {
         if (WireVitesse == 1) //Correction de la chauffe en fonction des steps
         {
             Heat.WireDynamique = (Heat.WireConsign * CORRECT_CHAUFFE);
-            if (Heat.WireDynamique > MAX_PERCENTAGE_WIRE) Heat.WireDynamique = MAX_PERCENTAGE_WIRE;
-        } else Heat.WireDynamique = Heat.WireConsign;
+            if (Heat.WireDynamique > MAX_PERCENTAGE_WIRE)
+                Heat.WireDynamique = MAX_PERCENTAGE_WIRE;
+        }
+        else
+            Heat.WireDynamique = Heat.WireConsign;
 
         analogWrite(PIN_WIRE_PWM, (Heat.WireDynamique * 2.55));
-    } else {
+    }
+    else
+    {
         //OCR4C = Heat.WireConsign; // PWM for wire heating (stretch 0-100% to a range of 0-254)*/
         analogWrite(PIN_WIRE_PWM, (Heat.WireConsign * 2.55));
     }
@@ -1115,7 +1200,8 @@ inline void HeatingManage(byte mode) {
 
 /**********************************************************************************/
 
-void ResetHeat(void) {
+void ResetHeat(void)
+{
     Heat.WireConsign = 0;
     PC.Heat = 0;
     HeatingRelay(OFF);
@@ -1127,20 +1213,23 @@ void ResetHeat(void) {
 
 /**********************************************************************************/
 
-inline void SoundAlarm(bool en) {
-    /*if(en)
+inline void SoundAlarm(bool en)
+{
+    if(en)
       ENABLE_T2_ISR();
     else
     {
       DISABLE_T2_ISR();
       digitalWrite(PIN_BUZZER, LOW);
-    }*/
+    }
 }
 
 /*********************************************************************************/
 
-inline void ProcessCommand(void) {
-    switch (CommandBuffer[CommandIndexRead].Cmd) {
+inline void ProcessCommand(void)
+{
+    switch (CommandBuffer[CommandIndexRead].Cmd)
+    {
     case 'M':
         ProcessStep(CommandBuffer[CommandIndexRead].Data.ui8[HIGH_BYTE]);
         break;
@@ -1193,8 +1282,10 @@ inline void ProcessCommand(void) {
 
 /**********************************************************************************/
 
-inline void IsrProcessBuffer(void) {
-    while (CommandCounter != 0) {
+inline void IsrProcessBuffer(void)
+{
+    while (CommandCounter != 0)
+    {
         ProcessCommand();
         CommandIndexRead++;
         CommandCounter--;
@@ -1206,20 +1297,22 @@ inline void IsrProcessBuffer(void) {
 
 /**********************************************************************************/
 
-ISR(TIMER1_COMPA_vect) {
-
+ISR(TIMER1_COMPA_vect)
+{
 }
 
 /**********************************************************************************/
 
-ISR(TIMER2_COMPA_vect) {
+ISR(TIMER2_COMPA_vect)
+{
     buzzerToogle = !buzzerToogle;
     digitalWrite(PIN_BUZZER, buzzerToogle);
 }
 
 /**********************************************************************************/
 
-ISR(TIMER5_COMPA_vect) {
+ISR(TIMER5_COMPA_vect)
+{
     digitalWrite(PIN_DEBUG3, HIGH);
     IsrProcessBuffer();
     digitalWrite(PIN_DEBUG3, LOW);
@@ -1229,14 +1322,15 @@ ISR(TIMER5_COMPA_vect) {
 
 ISR(USART0_RX_vect)
 {
-  digitalWrite(PIN_DEBUG4, HIGH);
-  ComParse();
-  digitalWrite(PIN_DEBUG4, LOW);
+    digitalWrite(PIN_DEBUG4, HIGH);
+    ComParse();
+    digitalWrite(PIN_DEBUG4, LOW);
 }
 
 /**********************************************************************************/
 
-void BufferFlush(void) {
+void BufferFlush(void)
+{
     CommandCounter = 0;
     ComOverflow = false;
     TX_WRITE('C');
@@ -1247,7 +1341,8 @@ void BufferFlush(void) {
 
 /**********************************************************************************/
 
-inline void CmdBufferWrite(unsigned char * Data) {
+inline void CmdBufferWrite(unsigned char *Data)
+{
     CommandBuffer[CommandIndexWrite].Cmd = Data[0];
     CommandBuffer[CommandIndexWrite].Data.ui8[HIGH_BYTE] = Data[1];
     CommandBuffer[CommandIndexWrite].Data.ui8[LOW_BYTE] = Data[2];
@@ -1259,8 +1354,10 @@ inline void CmdBufferWrite(unsigned char * Data) {
 
 /**********************************************************************************/
 
-inline void CheckComBufferOverflow(void) {
-    if ((CommandCounter >= COM_BUFFER_OVERFLOW_TRIGGER) && (!ComOverflow)) {
+inline void CheckComBufferOverflow(void)
+{
+    if ((CommandCounter >= COM_BUFFER_OVERFLOW_TRIGGER) && (!ComOverflow))
+    {
         ComOverflow = true;
         digitalWrite(PIN_DEBUG2, HIGH);
         TX_WRITE('S');
@@ -1269,8 +1366,10 @@ inline void CheckComBufferOverflow(void) {
 
 /**********************************************************************************/
 
-inline void CheckComBufferUnderflow(void) {
-    if ((CommandCounter <= COM_BUFFER_UNDERFLOW_TRIGGER) && (ComOverflow)) {
+inline void CheckComBufferUnderflow(void)
+{
+    if ((CommandCounter <= COM_BUFFER_UNDERFLOW_TRIGGER) && (ComOverflow))
+    {
         ComOverflow = false;
         digitalWrite(PIN_DEBUG2, LOW);
         TX_WRITE('C');
@@ -1279,10 +1378,12 @@ inline void CheckComBufferUnderflow(void) {
 
 /**********************************************************************************/
 
-inline void DataProcess(unsigned char * data) {
+inline void DataProcess(unsigned char *data)
+{
     CmdData i;
 
-    switch (data[0]) {
+    switch (data[0])
+    {
     case 'A':
         if (data[1] == '1')
             data[1] = ON;
@@ -1336,49 +1437,53 @@ inline void DataProcess(unsigned char * data) {
 
 /**********************************************************************************/
 
-inline void ComParse (void)
+inline void ComParse(void)
 {
-  static byte i = 0;
-  static unsigned char Cmd[CMD_DATA_SIZE];
-  static byte CmdSize = 0;
-  unsigned char data;
+    static byte i = 0;
+    static unsigned char Cmd[CMD_DATA_SIZE];
+    static byte CmdSize = 0;
+    unsigned char data;
 
-  RX_READ(data);
-  switch (ParserState)
-  {
+    RX_READ(data);
+    switch (ParserState)
+    {
     case PARSER_STATE_CMD:
-      if((data == 'A') || (data == 'H') || (data == 'M')){
-        Cmd[0] = data;
-        i = 1;
-        CmdSize = TWO_BYTE_CMD;
-        ParserState = PARSER_STATE_DATA;
-      }
-      else if((data == 'F')|| (data == 'P')){
-        Cmd[0] = data;
-        i = 1;
-        CmdSize = THREE_BYTE_CMD;
-        ParserState = PARSER_STATE_DATA;
-      }
-      break;
+        if ((data == 'A') || (data == 'H') || (data == 'M'))
+        {
+            Cmd[0] = data;
+            i = 1;
+            CmdSize = TWO_BYTE_CMD;
+            ParserState = PARSER_STATE_DATA;
+        }
+        else if ((data == 'F') || (data == 'P'))
+        {
+            Cmd[0] = data;
+            i = 1;
+            CmdSize = THREE_BYTE_CMD;
+            ParserState = PARSER_STATE_DATA;
+        }
+        break;
 
     case PARSER_STATE_DATA:
-      Cmd[i++] = data;
-      if(i >= CmdSize){
-        DataProcess(Cmd);
-        CmdBufferWrite(Cmd);
-        i = 0;
-        ParserState = PARSER_STATE_CMD;
-      }
-      break;
+        Cmd[i++] = data;
+        if (i >= CmdSize)
+        {
+            DataProcess(Cmd);
+            CmdBufferWrite(Cmd);
+            i = 0;
+            ParserState = PARSER_STATE_CMD;
+        }
+        break;
 
     default:
-      break;
-  }
+        break;
+    }
 }
 
 /**********************************************************************************/
 
-void GetSwitchStatus(void) {
+void GetSwitchStatus(void)
+{
     Switch.Status = 0;
 
     Switch.ControlMode = digitalRead(PIN_SWITCH_CONTROL_MODE);
@@ -1398,101 +1503,112 @@ void GetSwitchStatus(void) {
     Switch.Status += SwitchStatusTab[SWITCH_STATUS_HOMING_OK][Switch.HomingOk];
     //<
     //Al>
-    byte SomEndStop = (((digitalRead (PIN_X1_LIMIT)^ INV_FDC_X1) <<0)|((digitalRead (PIN_Y1_LIMIT)^INV_FDC_Y1) <<2)|((digitalRead (PIN_X2_LIMIT)^INV_FDC_X2) <<1)|((digitalRead (PIN_Y2_LIMIT)^INV_FDC_Y2) <<3));
-    if (SomEndStop== 0) Switch.EndStop = 0;
-    else Switch.EndStop = 1;
+    byte SomEndStop = (((digitalRead(PIN_X1_LIMIT) ^ INV_FDC_X1) << 0) | ((digitalRead(PIN_Y1_LIMIT) ^ INV_FDC_Y1) << 2) | ((digitalRead(PIN_X2_LIMIT) ^ INV_FDC_X2) << 1) | ((digitalRead(PIN_Y2_LIMIT) ^ INV_FDC_Y2) << 3));
+    if (SomEndStop == 0)
+        Switch.EndStop = 0;
+    else
+        Switch.EndStop = 1;
 
     //<
     Switch.Status += SwitchStatusTab[SWITCH_STATUS_ENDSTOP][Switch.EndStop];
 
-    #ifdef DEBUG
-      Switch.ControlMode = false;
-      Switch.MotorEnable = false;
-      Switch.Status &= 0xFE;
-    #endif
+#ifdef DEBUG
+    Switch.ControlMode = false;
+    Switch.MotorEnable = false;
+    Switch.Status &= 0xFE;
+#endif
 }
 
 /*********************************************************************************/
 
 void printLCD(uint8_t col, uint8_t row,
-    const char * s) {
-    
-    #ifdef MATRIX_LCD
-      lcdMatrix.printLcd(col, row, s);
-    #else
-      lcd.setCursor(col, row);
-      lcd.print(s);
-    #endif
+              const char *s)
+{
+
+#ifdef MATRIX_LCD
+    lcdMatrix.printLcd(col, row, s);
+#else
+    lcd.setCursor(col, row);
+    lcd.print(s);
+#endif
 }
 
 /*********************************************************************************/
 
-void printLCD_I(uint8_t col, uint8_t row, const char * s) {
-    printLCD(col,row,s);
-    #ifdef MATRIX_LCD
-        // Print imidialty -> You must use this methode
-        // before a Do/While
-        printMatrix(); 
-    #endif
+void printLCD_I(uint8_t col, uint8_t row, const char *s)
+{
+    printLCD(col, row, s);
+#ifdef MATRIX_LCD
+    // Print imidialty -> You must use this methode
+    // before a Do/While
+    printMatrix();
+#endif
 }
 
 /*********************************************************************************/
 
-void printMatrix() {
-    #ifdef MATRIX_LCD
-        if(lcdMatrix.isupdated()) lcdMatrix.printMatrix();
-    #endif
+void printMatrix()
+{
+#ifdef MATRIX_LCD
+    if (lcdMatrix.isupdated())
+        lcdMatrix.printMatrix();
+#endif
 }
 
 /*********************************************************************************/
 
-void clearLCD() {
-    #ifdef MATRIX_LCD
-      lcdMatrix.clearLcd();
-    #else
-      lcd.clear();
-    #endif
+void clearLCD()
+{
+#ifdef MATRIX_LCD
+    lcdMatrix.clearLcd();
+#else
+    lcd.clear();
+#endif
 }
 
 /*********************************************************************************/
 
-void HMI_WriteModeManu(void) {
+void HMI_WriteModeManu(void)
+{
     printLCD(0, 2, "MANU ");
     printLCD(0, 3, "          ");
 }
 
 /*********************************************************************************/
 
-void HMI_WriteModePC(void) {
+void HMI_WriteModePC(void)
+{
     printLCD(0, 2, " PC  I  ON  PC   OFF");
     printLCD(6, 3, "mm/s");
 }
 
 /*********************************************************************************/
 
-inline void HMI_InitScreen(void) {
-    // Welcome text
-    #ifndef MATRIX_LCD
-        lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
-    #endif
+inline void HMI_InitScreen(void)
+{
+// Welcome text
+#ifndef MATRIX_LCD
+    lcd.begin(LCD_COLUMN_COUNT, LCD_LINE_COUNT);
+#endif
     clearLCD();
     printLCD(0, 0, TITLE_JEDICUT);
     printLCD(7, 1, VERSION);
     printLCD(7, 2, STRINGIFY(BAUDRATE));
 
-    #ifdef BUZZER_ON
-      printLCD(5, 3, BUZZ_ON);
-      SoundAlarm(ON);
-      delay(500);
-      SoundAlarm(OFF);
-    #else
-      printLCD(5, 3, BUZZ_OFF);
-    #endif
+#ifdef BUZZER_ON
+    printLCD(5, 3, BUZZ_ON);
+    SoundAlarm(ON);
+    delay(500);
+    SoundAlarm(OFF);
+#else
+    printLCD(5, 3, BUZZ_OFF);
+#endif
 }
 
 /*********************************************************************************/
 
-inline void HMI_ParamsScreen(void) {
+inline void HMI_ParamsScreen(void)
+{
     clearLCD();
 
     static char temp0[sizeof(MM_STEP) + 10] = {' '}; // +10 because sizeof(MM_PER_STEP) make somme crash
@@ -1501,47 +1617,49 @@ inline void HMI_ParamsScreen(void) {
     printLCD(0, 0, temp0);
 
     static char temp1[sizeof(TEXT1) + sizeof(MAX_PERCENTAGE_WIRE) + 1] = {
-        ' '
-    };
+        ' '};
     strcat(temp1, TEXT1);
     strcat(temp1, itostr3left(MAX_PERCENTAGE_WIRE));
     strcat(temp1, "%");
     printLCD(0, 1, temp1);
 
     static char temp2[sizeof(TEXT2) + sizeof(MAX_PERCENTAGE_CUTTER) + 1] = {
-        ' '
-    };
+        ' '};
     strcat(temp2, TEXT2);
     strcat(temp2, itostr3left((MAX_PERCENTAGE_CUTTER)));
     strcat(temp2, "%");
     printLCD(0, 2, temp2);
-    #ifdef HEAT_CONSIGN_ROTARY_ENCODER
-      printLCD(0, 3, TEXT4);
-    #else
-      printLCD(0, 3, TEXT3);
-    #endif
+#ifdef HEAT_CONSIGN_ROTARY_ENCODER
+    printLCD(0, 3, TEXT4);
+#else
+    printLCD(0, 3, TEXT3);
+#endif
 }
 
 /*********************************************************************************/
 
-inline void HMI_InitSwitchScreen(void) {
+inline void HMI_InitSwitchScreen(void)
+{
     clearLCD();
     printLCD(0, 1, TEXT6);
 }
 
 /*********************************************************************************/
 
-inline bool HMI_SwitchInitScreen(void) {
+inline bool HMI_SwitchInitScreen(void)
+{
     static byte old = 0;
     byte status = Switch.Status;
 
-    #ifdef DEBUG
-      status = 0x1F;
-    #endif
+#ifdef DEBUG
+    status = 0x1F;
+#endif
 
-    if (IsSwitchNotInitialized(status)) {
-        if (old != status) {
-            if (!Switch.ControlMode) // test si l'inter Mode est sur Manu
+    if (IsSwitchNotInitialized(status))
+    {
+        if (old != status)
+        {
+            if (!Switch.ControlMode)   // test si l'inter Mode est sur Manu
                 printLCD(0, 2, TEXT7); // attente inter Mode sur Manu
             else if (!Switch.MotorEnable)
                 printLCD(0, 2, TEXT8); // attente inter Moteur sur OFF
@@ -1559,51 +1677,70 @@ inline bool HMI_SwitchInitScreen(void) {
     printLCD(0, 1, TITLE_MENU);
     printLCD(0, 3, TITLE_VAR);
 
-    #ifdef DEBUG
-      digitalWrite(13, LOW);
-    #endif
+#ifdef DEBUG
+    digitalWrite(13, LOW);
+#endif
 
     return true;
 }
 
 /*********************************************************************************/
 
-inline void HMI_ModeScreen(void) {
+inline void HMI_ModeScreen(void)
+{
     static byte old = 0;
-    
 
-    if (old != Switch.Status) {
+    if (old != Switch.Status)
+    {
         printLCD(0, 2, "                    ");
-        if (Switch.ControlMode) {
+        if (Switch.ControlMode)
+        {
             printLCD(0, 2, MAN);
 
-            if (Switch.MotorEnable) printLCD(7, 2, OFF_STATUS);
-            else printLCD(7, 2, ON_STATUS);
+            if (Switch.MotorEnable)
+                printLCD(7, 2, OFF_STATUS);
+            else
+                printLCD(7, 2, ON_STATUS);
 
-            if (!Switch.HeatManu) printLCD(12, 2, MAN);
-            else if (!Switch.HeatPC) printLCD(12, 2, DIS);
-            else printLCD(12, 2, OFF_STATUS);
+            if (!Switch.HeatManu)
+                printLCD(12, 2, MAN);
+            else if (!Switch.HeatPC)
+                printLCD(12, 2, DIS);
+            else
+                printLCD(12, 2, OFF_STATUS);
 
-            if (Switch.CutterEnable) printLCD(17, 2, OFF_STATUS);
-            else printLCD(17, 2, ON_STATUS);
-        } else {
+            if (Switch.CutterEnable)
+                printLCD(17, 2, OFF_STATUS);
+            else
+                printLCD(17, 2, ON_STATUS);
+        }
+        else
+        {
             printLCD(0, 2, PC_STATUS);
 
-            if (Switch.MotorEnable) printLCD(7, 2, OFF_STATUS);
-            else printLCD(8, 2, PC_STATUS);
+            if (Switch.MotorEnable)
+                printLCD(7, 2, OFF_STATUS);
+            else
+                printLCD(8, 2, PC_STATUS);
 
-            if (!Switch.HeatManu) printLCD(12, 2, MAN);
-            else if (!Switch.HeatPC) printLCD(12, 2, PC_STATUS);
-            else printLCD(12, 2, OFF_STATUS);
+            if (!Switch.HeatManu)
+                printLCD(12, 2, MAN);
+            else if (!Switch.HeatPC)
+                printLCD(12, 2, PC_STATUS);
+            else
+                printLCD(12, 2, OFF_STATUS);
 
             printLCD(17, 2, DIS);
         }
 
         //  if(Switch.EndStop && Switch.EndStopShunt)
-        if (Switch.EndStop && !Switch.ControlMode) {
+        if (Switch.EndStop && !Switch.ControlMode)
+        {
             SoundAlarm(ON);
             printLCD(5, 2, "K");
-        } else {
+        }
+        else
+        {
             SoundAlarm(OFF);
             printLCD(5, 2, "I");
         }
@@ -1615,9 +1752,11 @@ inline void HMI_ModeScreen(void) {
 
 /*********************************************************************************/
 
-inline void HMI_ManuDigitScreen(void) {
+inline void HMI_ManuDigitScreen(void)
+{
     static char line[21] = {"              %    %"};
-    if ((Heat.WireConsign != HMI.WireConsign) || (Heat.CutterConsign != HMI.CutterConsign) || (HMI.ProcessDigit)) {
+    if ((Heat.WireConsign != HMI.WireConsign) || (Heat.CutterConsign != HMI.CutterConsign) || (HMI.ProcessDigit))
+    {
         HMI.WireConsign = Heat.WireConsign;
         HMI.CutterConsign = Heat.CutterConsign;
 
@@ -1635,18 +1774,21 @@ inline void HMI_ManuDigitScreen(void) {
 
 /*********************************************************************************/
 
-inline void HMI_PcDigitScreen(void) {
+inline void HMI_PcDigitScreen(void)
+{
     static char line[21] = {TITLE_VAR2};
     float mmPerSec;
     byte val, valDec;
 
-    if ((Heat.WireConsign != HMI.WireConsign) || (PC.Feedrate != HMI.Feedrate) || (HMI.ProcessDigit)) {
+    if ((Heat.WireConsign != HMI.WireConsign) || (PC.Feedrate != HMI.Feedrate) || (HMI.ProcessDigit))
+    {
         HMI.WireConsign = Heat.WireConsign;
         HMI.Feedrate = PC.Feedrate;
 
-        if (HMI.Feedrate > 0) {
+        if (HMI.Feedrate > 0)
+        {
             mmPerSec = MM_PER_SECONDE / (float)(HMI.Feedrate);
-            val = (byte) mmPerSec;
+            val = (byte)mmPerSec;
             valDec = ((unsigned int)(mmPerSec * 100.0) % 100);
 
             line[0] = val >= 100 ? ('0' + (val / 100)) : ' ';
@@ -1667,17 +1809,22 @@ inline void HMI_PcDigitScreen(void) {
 
 /*********************************************************************************/
 
-inline void HMI_DigitScreen(void) {
-    if (Switch.ControlMode) HMI_ManuDigitScreen();
-    else HMI_PcDigitScreen();
+inline void HMI_DigitScreen(void)
+{
+    if (Switch.ControlMode)
+        HMI_ManuDigitScreen();
+    else
+        HMI_PcDigitScreen();
 }
 
 /*********************************************************************************/
 
-inline void HMI_Manage(void) {
+inline void HMI_Manage(void)
+{
     static unsigned long i = 0;
     rotBtn.rotBtnRefresh();
-    switch (HMI.State) {
+    switch (HMI.State)
+    {
     case HMI_MODE_SCREEN:
         HMI_ModeScreen();
         HMI_DigitScreen();
@@ -1701,7 +1848,8 @@ inline void HMI_Manage(void) {
         break;
 
     case HMI_PARAMS_DELAY:
-        if (i < millis()) {
+        if (i < millis())
+        {
             HMI_InitSwitchScreen();
             HMI.State = HMI_SWITCH_SCREEN;
         }
@@ -1716,22 +1864,28 @@ inline void HMI_Manage(void) {
 
 /*********************************************************************************/
 
-inline void ModeManage(void) {
-    switch (modeState) {
+inline void ModeManage(void)
+{
+    switch (modeState)
+    {
     case MODE_INIT:
         if (HMI.State == HMI_MODE_SCREEN)
             modeState = MODE_MANU;
         break;
 
     case MODE_MANU:
-        if (!Switch.ControlMode && !Switch.EndStop && !Switch.MotorEnable && Switch.HomingOk) {
+        if (!Switch.ControlMode && !Switch.EndStop && !Switch.MotorEnable && Switch.HomingOk)
+        {
             BufferFlush();
             ENABLE_T5_ISR();
             ENABLE_T1_ISR();
             modeState = MODE_PC;
-        } else {
+        }
+        else
+        {
             EndStopManage();
-            if (Switch.MotorEnable == 0) {
+            if (Switch.MotorEnable == 0)
+            {
                 HomingManage();
             }
             HeatingManage(MODE_MANU);
@@ -1739,7 +1893,8 @@ inline void ModeManage(void) {
         break;
 
     case MODE_PC:
-        if (Switch.ControlMode || Switch.EndStop || Switch.MotorEnable) {
+        if (Switch.ControlMode || Switch.EndStop || Switch.MotorEnable)
+        {
             DISABLE_T1_ISR();
             DISABLE_T5_ISR();
 
@@ -1750,7 +1905,8 @@ inline void ModeManage(void) {
             ResetHeat();
 
             modeState = MODE_MANU;
-        } else
+        }
+        else
             HeatingManage(MODE_PC);
         break;
     }
@@ -1759,11 +1915,16 @@ inline void ModeManage(void) {
 /**********************************************************************************/
 /**** The main loop                                                           *****/
 /**********************************************************************************/
-void loop(void) {
+void loop(void)
+{
     GetSwitchStatus();
     StepperDriverManage();
     PauseManage();
     ModeManage();
     HMI_Manage();
+
+//If some text should be updated, also printMatrix() refresh the display.
+#ifdef MATRIX_LCD
     printMatrix();
+#endif
 }

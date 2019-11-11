@@ -12,12 +12,9 @@
 #define LANG_FRENCH
 //#define LANG_ENGLISH
 
+// If you have a display type 12864 Full Graphic smart controller. Uncomment "MATRIX_LCD"
+// Otherwise use a display type 2002.
 #define MATRIX_LCD
-#define PINA_MAT 31
-#define PINB_MAT 33
-#define PINS_MAT 35
-//#define CRYSTAL_LCD
-
 
 // millimeter per Step
 // Example 1: Stepper Driver setting: Full Step, Stepper Motor: 400 steps per revolution, M6 Lead screw: 1mm thread => (mm per revolution * driver setting) / step per revolution = (1*1)/400 = 0.0025

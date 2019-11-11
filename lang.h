@@ -22,7 +22,7 @@
 
 #ifndef _LANG_H
 #define _LANG_H
-#include "conf.h"
+#include "headers.h"
 
 #ifdef LANG_FRENCH
   #define TEXT1 "Lim Chauffe = "
@@ -38,32 +38,13 @@
   #define TEXT11 " Etat fin de course"
   #define TEXT12 " --> BP Homing"
   #define TEXT13 "  Homing en cours  "
-  #define TEXT14 "Mode  Mot  Chau  Cut"
+  #define TEXT14 "MODE   MOT Chau  CUT"
   #define TEXT15 "Manu"
   #define TEXT16 " PC "
   #define TEXT17 " Etat fin de course"
   #define TEXT18 "Fin -> Pot Ch < 10%"
   #define TEXT19 "   Attente Homing   "
   #define TEXT20 " Homing Termine     "
-
-  #define BUZZ_ON     "BUZZER ON"
-  #define BUZZ_OFF    "BUZZER OFF"
-
-  #define OFF_STATUS  "OFF"
-  #define ON_STATUS   " ON"
-  #define MAN         "MAN"
-  #define DIS         "DIS"
-  #define PC_STATUS   "PC "
-  #define ON_STATUS   " ON"
-
-  #define TITLE_MENU  "MODE E MOT WIRE  CUT"
-  #define TITLE_FDC   "  X1   Y1   X2   Y2"
-  #define TITLE_VAR   "             0%   0%"
-  #define TITLE_VAR2  "  0.00mm/s    %     "
-
-  #define MM_STEP     "mm/step "
-
-  #define TITLE_JEDICUT  "  JediCut-Alden USB"
 #endif        
 
 // I suggest the following as they read better in English
@@ -88,25 +69,35 @@
   #define TEXT18 "Exit-> Heat < 10%   "
   #define TEXT19 "Waiting for Homing  "
   #define TEXT20 "  Homing Finished   "
-
-  #define BUZZ_ON "BUZZER ON"
-  #define BUZZ_OFF "BUZZER OFF"
-
-  #define OFF_STATUS "OFF"
-  #define ON_STATUS " ON"
-  #define MAN "MAN"
-  #define DIS " DIS"
-  #define PC_STATUS " PC "
-  #define ON_STATUS " ON"
-
-  #define TITLE_MENU  "MODE E MOT WIRE  CUT"
-  #define TITLE_FDC   "  X1   Y1   X2   Y2"
-  #define TITLE_VAR   "             0%   0%"
-  #define TITLE_VAR2  "  0.00mm/s    %     "
-
-  #define MM_STEP     "mm/step "
-
-  #define TITLE_JEDICUT  " JediCut-Alden USB"
 #endif
+
+// GENERAL DEFINE. Not impacted by the langage
+#define BUZZ_ON     "BUZZER ON"
+#define BUZZ_OFF    "BUZZER OFF"
+
+#define OFF_STATUS "OFF"
+#define ON_STATUS " ON"
+#define MAN "MAN"
+#define MANU "MANU "
+#define DIS "DIS"
+#define PC_STATUS "PC "
+#define ON_STATUS "ON "
+
+#define TITLE_CAT     " PC  I  ON  PC   OFF"
+#define TITLE_FDC     "  X1   Y1   X2   Y2"
+#define TITLE_VAR     "             0%   0%"
+#define TITLE_VAR2    "  0.00mm/s    %     "
+#define TITLE_ENDSTOP "C1a C1 C2 C3 C4 Ppos"
+#define TITLE_PERCENT "              %    %"
+
+#define MM_STEP     "mm/step "
+#define MM_S        "mm/s"
+
+#define TITLE_JEDICUT  " JediCut-Alden USB"
+
+#define CLEAN3 "   "
+#define CLEAN10 "          "
+#define CLEAN19 "                   "
+#define CLEAN20 "                    "
 
 #endif                 

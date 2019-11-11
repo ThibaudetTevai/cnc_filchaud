@@ -1,5 +1,5 @@
 #include "U8glib.h"
-#include "../lcd/lcdMatrix.h"
+#include "../lcd/128x64/lcdMatrix.h"
 #include "../rotBtn/rotBtn.h"
 #include <SoftwareSerial.h>
 

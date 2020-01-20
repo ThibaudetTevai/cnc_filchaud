@@ -1,6 +1,7 @@
 #ifndef _STRUCTS_H
 #define _STRUCTS_H
 #include "headers.h"
+#include "enums.h"
 
 typedef struct TypeBuffer
 {

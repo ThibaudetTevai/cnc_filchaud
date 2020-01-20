@@ -81,7 +81,6 @@
 #define MANU "MANU "
 #define DIS "DIS"
 #define PC_STATUS "PC "
-#define ON_STATUS "ON "
 
 #define TITLE_CAT     " PC  I  ON  PC   OFF"
 #define TITLE_FDC     "  X1   Y1   X2   Y2"

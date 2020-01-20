@@ -1,3 +1,6 @@
+#ifndef _HEADERS_H
+#define _HEADERS_H
+
 /* External library */
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -13,3 +16,5 @@
 #include "lcd/20x04/LiquidCrystal.h"
 #include "rotBtn/rotBtn.h"
 #include "utils/utility.h"
+
+#endif

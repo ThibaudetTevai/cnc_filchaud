@@ -46,4 +46,15 @@ struct StructSwitch
     byte Status;
 } Switch;
 
+
+struct ProbCurrent
+{
+    float shuntvoltage = 0;
+    float busvoltage = 0;
+    float current_mA = 0;
+    float loadvoltage = 0;
+    float power_mW = 0;
+} probCurrent;
+
+
 #endif

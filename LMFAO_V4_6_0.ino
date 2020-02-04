@@ -70,6 +70,12 @@ byte Val_Y1_Limit; // "0" fdc Y1 non sollicité
 byte Val_X2_Limit; // "0" fdc X2 non sollicité
 byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 
+#ifdef INA219
+    Adafruit_INA219 ina219;
+    ina219.begin();
+    probCurrent prob;
+#endif
+
 
 #ifdef MATRIX_LCD    
     LcdMatrix lcdMatrix; // MATRIX declaration
@@ -89,6 +95,7 @@ bool StepperDriverEnableMode = STEPPER_DRIVER_ENABLE_HIGH_LEVEL;
 volatile TBuffer CommandBuffer[CMD_BUFFER_SIZE];
 volatile byte CommandIndexRead = 0;
 volatile byte CommandIndexWrite = 0;
+
 volatile byte CommandCounter = 0;
 
 byte ComOverflow = 0;
@@ -1624,6 +1631,21 @@ inline void ModeManage(void)
             HeatingManage(MODE_PC);
         break;
     }
+}
+
+void getCurrentVoltage(){
+    shuntvoltage = ina219.getShuntVoltage_mV();
+  busvoltage = ina219.getBusVoltage_V();
+  current_mA = ina219.getCurrent_mA();
+  power_mW = ina219.getPower_mW();
+  loadvoltage = busvoltage + (shuntvoltage / 1000);
+  
+  Serial.print("Bus Voltage:   "); Serial.print(busvoltage); Serial.println(" V");
+  Serial.print("Shunt Voltage: "); Serial.print(shuntvoltage); Serial.println(" mV");
+  Serial.print("Load Voltage:  "); Serial.print(loadvoltage); Serial.println(" V");
+  Serial.print("Current:       "); Serial.print(current_mA); Serial.println(" mA");
+  Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
+  Serial.println("");
 }
 
 /**********************************************************************************/

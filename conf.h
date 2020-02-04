@@ -18,6 +18,7 @@
 
 // WORK IN PROGRESS : The INA219 is a Current / Voltage prob.
 #define INA219 
+#define D_INA219 //Debug printing on serial INA219
 
 // millimeter per Step
 // Example 1: Stepper Driver setting: Full Step, Stepper Motor: 400 steps per revolution, M6 Lead screw: 1mm thread => (mm per revolution * driver setting) / step per revolution = (1*1)/400 = 0.0025

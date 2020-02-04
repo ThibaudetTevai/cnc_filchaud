@@ -73,7 +73,6 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 #ifdef INA219
     Adafruit_INA219 ina219;
     ina219.begin();
-    probCurrent prob;
 #endif
 
 
@@ -1634,18 +1633,21 @@ inline void ModeManage(void)
 }
 
 void getCurrentVoltage(){
-    shuntvoltage = ina219.getShuntVoltage_mV();
-  busvoltage = ina219.getBusVoltage_V();
-  current_mA = ina219.getCurrent_mA();
-  power_mW = ina219.getPower_mW();
-  loadvoltage = busvoltage + (shuntvoltage / 1000);
-  
-  Serial.print("Bus Voltage:   "); Serial.print(busvoltage); Serial.println(" V");
-  Serial.print("Shunt Voltage: "); Serial.print(shuntvoltage); Serial.println(" mV");
-  Serial.print("Load Voltage:  "); Serial.print(loadvoltage); Serial.println(" V");
-  Serial.print("Current:       "); Serial.print(current_mA); Serial.println(" mA");
-  Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
-  Serial.println("");
+    probCurrent.shuntvoltage = ina219.getShuntVoltage_mV();
+    probCurrent.busvoltage = ina219.getBusVoltage_V();
+    probCurrent.current_mA = ina219.getCurrent_mA();
+    probCurrent.power_mW = ina219.getPower_mW();
+    probCurrent.loadvoltage = probCurrent.busvoltage + (probCurrent.shuntvoltage / 1000);
+
+    
+    #ifdef D_INA219
+        Serial.print("Bus Voltage:   "); Serial.print(probCurrent.busvoltage); Serial.println(" V");
+        Serial.print("Shunt Voltage: "); Serial.print(probCurrent.shuntvoltage); Serial.println(" mV");
+        Serial.print("Load Voltage:  "); Serial.print(probCurrent.loadvoltage); Serial.println(" V");
+        Serial.print("Current:       "); Serial.print(probCurrent.current_mA); Serial.println(" mA");
+        Serial.print("Power:         "); Serial.print(probCurrent.power_mW); Serial.println(" mW");
+        Serial.println("");
+    #endif
 }
 
 /**********************************************************************************/
@@ -1658,6 +1660,12 @@ void loop(void)
     PauseManage();
     ModeManage();
     HMI_Manage();
+
+    
+    //If the current probe INA219 is implemented.
+    #ifdef INA219
+        getCurrentVoltage();
+    #endif
 
     //If some text should be updated, also printMatrix() refresh the display.
     #ifdef MATRIX_LCD

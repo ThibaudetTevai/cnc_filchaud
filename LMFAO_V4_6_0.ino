@@ -62,8 +62,6 @@
   Heating PWM            -                                  7  (PH4)
 */
 #include "headers.h"
-#include <Wire.h>
-#include <Adafruit_INA219.h>
 
 // Mot de la lecture des fins de course 0b 0,0,0,0,fdcY2,fdcY1,fdcX2,fdcX1
 byte mask_limits;  // Résultat de la lecture des fins de courses
@@ -138,13 +136,17 @@ int maPreset;
 /**********************************************************************************/
 void setup(void)
 {
-    //serial com Initialization
-    UCSR0A |= (1 << U2X0);                                 // double transmission speed
-    UCSR0B |= (1 << RXCIE0) | (1 << TXEN0) | (1 << RXEN0); //enable transmitter, receiver, enable receive complete interrupt
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);                /* 8 data bits, 1 stop bit */
-    UBRR0H = (BAUDRATE_R >> 8);                            // shift the register right by 8 bits to get the upper 8 bits
-    UBRR0L = BAUDRATE_R;                                   // Configure USART Clock register
-    SREG |= 0x80;                                          //set global interrupt enable bit
+    #ifdef USART_ARDUINO
+        Serial.begin(115200);
+    #else
+        //serial com Initialization
+        UCSR0A |= (1 << U2X0);                                 // double transmission speed
+        UCSR0B |= (1 << RXCIE0) | (1 << TXEN0) | (1 << RXEN0); //enable transmitter, receiver, enable receive complete interrupt
+        UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);                /* 8 data bits, 1 stop bit */
+        UBRR0H = (BAUDRATE_R >> 8);                            // shift the register right by 8 bits to get the upper 8 bits
+        UBRR0L = BAUDRATE_R;                                   // Configure USART Clock register
+        SREG |= 0x80;                                          //set global interrupt enable bit
+    #endif
 
     // pins Initialization
 
@@ -155,7 +157,7 @@ void setup(void)
 
     // INA219
     #ifdef INA219
-        ina219.begin();
+        ina219.begin(); // Init I2C and calibration 32V 2A
     #endif
 
 
@@ -1047,13 +1049,14 @@ ISR(TIMER5_COMPA_vect)
 }
 
 /**********************************************************************************/
-
-ISR(USART0_RX_vect)
-{
-    digitalWrite(PIN_DEBUG4, HIGH);
-    ComParse();
-    digitalWrite(PIN_DEBUG4, LOW);
-}
+#ifndef USART_ARDUINO
+    ISR(USART0_RX_vect)
+    {
+        digitalWrite(PIN_DEBUG4, HIGH);
+        ComParse();
+        digitalWrite(PIN_DEBUG4, LOW);
+    }
+#endif
 
 /**********************************************************************************/
 
@@ -1251,21 +1254,33 @@ void GetSwitchStatus(void)
 /************************ PRINTING STRING ON SERIAL ******************************/
 /*********************************************************************************/
 void printSerial(char const *str){
-    for (uint8_t i = 0; i < strlen(str); i++){ 
-        while (( UCSR0A & (1<<UDRE0))  == 0){};
-        UDR0 = str[i]; 
-    }
+    #ifdef USART_ARDUINO
+        Serial.print(str);
+    #else
+        for (uint8_t i = 0; i < strlen(str); i++){ 
+            while (( UCSR0A & (1<<UDRE0))  == 0){};
+            UDR0 = str[i]; 
+        }
+    #endif
 }
 
 void printSerialLn(char const *str){
-    printSerial(str);
-    printSerial("\n");
+    #ifdef USART_ARDUINO
+        Serial.println(str);
+    #else
+        printSerial(str);
+        printSerial("\n");
+    #endif
 }
 
 void printSerial(double value){
-    char str[20];
-    sprintf(str, "%5.3lf%%", value); 
-    printSerial(str);
+    #ifdef USART_ARDUINO
+        Serial.print(value);
+    #else
+        char str[20];
+        sprintf(str, "%lf", value); 
+        printSerial(str);
+    #endif
 }
 
 /*********************************************************************************/
@@ -1664,19 +1679,15 @@ inline void ModeManage(void)
 void getCurrentVoltage(){
     
     #ifdef INA219
-    probCurrent.shuntvoltage = ina219.getShuntVoltage_mV();
-    probCurrent.busvoltage = ina219.getBusVoltage_V();
-    // probCurrent.current_mA = ina219.getCurrent_mA();
-    // probCurrent.power_mW = ina219.getPower_mW();
-    // probCurrent.loadvoltage = probCurrent.busvoltage + (probCurrent.shuntvoltage / 1000);
+        probCurrent.current_mA = ina219.getCurrent_mA();
+        probCurrent.power_mW = ina219.getPower_mW();
+        if(probCurrent.power_mW < 0.0) probCurrent.power_mW = probCurrent.power_mW * -1.0;
+        probCurrent.voltage_V = ina219.getBusVoltage_V() + (ina219.getShuntVoltage_mV() / 1000);
 
         #ifdef D_INA219
-            printSerial("Bus Voltage:   "); printSerial(probCurrent.busvoltage); printSerial(" V");
-            printSerial("Shunt Voltage: "); printSerial(probCurrent.shuntvoltage); printSerial(" mV");
-            printSerial("Load Voltage:  "); printSerial(probCurrent.loadvoltage); printSerial(" V");
-            printSerial("Current:       "); printSerial(probCurrent.current_mA); printSerial(" mA");
-            printSerial("Power:         "); printSerial(probCurrent.power_mW); printSerial(" mW");
-            printSerialLn("");
+            printSerial(probCurrent.voltage_V); printSerial(" V");
+            printSerial("\t"); printSerial(probCurrent.current_mA); printSerial(" mA");
+            printSerial("\t"); printSerial(probCurrent.power_mW); printSerialLn(" mW");
         #endif
     
     #endif
@@ -1693,7 +1704,7 @@ void loop(void)
     StepperDriverManage();
     PauseManage();
     ModeManage();
-    HMI_Manage();
+    //HMI_Manage();
 
     
     //If the current probe INA219 is implemented.

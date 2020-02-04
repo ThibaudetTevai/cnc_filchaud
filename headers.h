@@ -5,6 +5,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/iom2560.h>
+#include <arduino.h>
 #include <Wire.h> // For INA219
 
 /* Internal header */

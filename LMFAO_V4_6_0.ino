@@ -62,6 +62,8 @@
   Heating PWM            -                                  7  (PH4)
 */
 #include "headers.h"
+#include <Wire.h>
+#include <Adafruit_INA219.h>
 
 // Mot de la lecture des fins de course 0b 0,0,0,0,fdcY2,fdcY1,fdcX2,fdcX1
 byte mask_limits;  // Résultat de la lecture des fins de courses
@@ -70,17 +72,16 @@ byte Val_Y1_Limit; // "0" fdc Y1 non sollicité
 byte Val_X2_Limit; // "0" fdc X2 non sollicité
 byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
 
-#ifdef INA219
-    Adafruit_INA219 ina219;
-    ina219.begin();
-#endif
-
-
 #ifdef MATRIX_LCD    
     LcdMatrix lcdMatrix; // MATRIX declaration
 #else
     //LCD declaration
     LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+#endif
+
+#ifdef INA219
+    //INA 219 declaration for the prob current
+    Adafruit_INA219 ina219;
 #endif
 
 #ifdef HEAT_CONSIGN_ROTARY_ENCODER
@@ -151,6 +152,12 @@ void setup(void)
     #ifdef MATRIX_LCD
         lcdMatrix.setup();
     #endif
+
+    // INA219
+    #ifdef INA219
+        ina219.begin();
+    #endif
+
 
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
@@ -278,6 +285,7 @@ void setup(void)
     //Al>
     AideMiseServiceFdc(); // aide à la mise en service des fins de course
     //<
+    printSerialLn("End Setup");
 }
 
 //==============================================================================
@@ -1240,6 +1248,27 @@ void GetSwitchStatus(void)
 }
 
 /*********************************************************************************/
+/************************ PRINTING STRING ON SERIAL ******************************/
+/*********************************************************************************/
+void printSerial(char const *str){
+    for (uint8_t i = 0; i < strlen(str); i++){ 
+        while (( UCSR0A & (1<<UDRE0))  == 0){};
+        UDR0 = str[i]; 
+    }
+}
+
+void printSerialLn(char const *str){
+    printSerial(str);
+    printSerial("\n");
+}
+
+void printSerial(double value){
+    char str[20];
+    sprintf(str, "%5.3lf%%", value); 
+    printSerial(str);
+}
+
+/*********************************************************************************/
 
 void printLCD(uint8_t col, uint8_t row,
               const char *s)
@@ -1633,22 +1662,27 @@ inline void ModeManage(void)
 }
 
 void getCurrentVoltage(){
+    
+    #ifdef INA219
     probCurrent.shuntvoltage = ina219.getShuntVoltage_mV();
     probCurrent.busvoltage = ina219.getBusVoltage_V();
-    probCurrent.current_mA = ina219.getCurrent_mA();
-    probCurrent.power_mW = ina219.getPower_mW();
-    probCurrent.loadvoltage = probCurrent.busvoltage + (probCurrent.shuntvoltage / 1000);
+    // probCurrent.current_mA = ina219.getCurrent_mA();
+    // probCurrent.power_mW = ina219.getPower_mW();
+    // probCurrent.loadvoltage = probCurrent.busvoltage + (probCurrent.shuntvoltage / 1000);
 
+        #ifdef D_INA219
+            printSerial("Bus Voltage:   "); printSerial(probCurrent.busvoltage); printSerial(" V");
+            printSerial("Shunt Voltage: "); printSerial(probCurrent.shuntvoltage); printSerial(" mV");
+            printSerial("Load Voltage:  "); printSerial(probCurrent.loadvoltage); printSerial(" V");
+            printSerial("Current:       "); printSerial(probCurrent.current_mA); printSerial(" mA");
+            printSerial("Power:         "); printSerial(probCurrent.power_mW); printSerial(" mW");
+            printSerialLn("");
+        #endif
     
-    #ifdef D_INA219
-        Serial.print("Bus Voltage:   "); Serial.print(probCurrent.busvoltage); Serial.println(" V");
-        Serial.print("Shunt Voltage: "); Serial.print(probCurrent.shuntvoltage); Serial.println(" mV");
-        Serial.print("Load Voltage:  "); Serial.print(probCurrent.loadvoltage); Serial.println(" V");
-        Serial.print("Current:       "); Serial.print(probCurrent.current_mA); Serial.println(" mA");
-        Serial.print("Power:         "); Serial.print(probCurrent.power_mW); Serial.println(" mW");
-        Serial.println("");
     #endif
 }
+
+
 
 /**********************************************************************************/
 /**** The main loop                                                           *****/

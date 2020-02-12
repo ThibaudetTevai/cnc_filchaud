@@ -4,7 +4,7 @@
 
 //#define DEBUG
 //#define USART_ARDUINO //Unplug the ISR for RX avec push with the arduino lib : Serial.print()
-//#define D_INA219 //Debug printing on serial INA219
+#define D_INA219 //Debug printing on serial INA219
 
 #define MACHINE_NAME "   CNC FIL AERODEN"
 

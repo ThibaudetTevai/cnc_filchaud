@@ -649,7 +649,10 @@ void Trait_Arr_fdc()
     clearLCD();
     testPosIntDem();
     clearLCD();
-    printLCD(0, 0, MachineName);
+    
+    #ifndef INA219
+        printLCD(0, 0, MachineName);
+    #endif
     printLCD(0, 1, TEXT14);
     printLCD(0, 3, TITLE_VAR);
 }
@@ -713,7 +716,9 @@ inline void PauseManage(void)
             ActivePause = 0;
             kPause = 0;
             printLCD(0, 0, CLEAN19);
-            printLCD(0, 0, MachineName);
+            #ifdef INA219
+                printLCD(0, 0, MachineName);
+            #endif
             ENABLE_T5_ISR();
         }
     }
@@ -1269,7 +1274,7 @@ void printSerialLn(char const *str){
         Serial.println(str);
     #else
         printSerial(str);
-        printSerial("\n");
+        printSerial("\n"); 
     #endif
 }
 
@@ -1437,7 +1442,10 @@ inline bool HMI_SwitchInitScreen(void)
     }
 
     clearLCD();
-    printLCD(0, 0, MachineName);
+    
+    #ifdef INA219
+        printLCD(0, 0, MachineName);
+    #endif
     printLCD(0, 1, TEXT14);
     printLCD(0, 3, TITLE_VAR);
 
@@ -1453,6 +1461,14 @@ inline bool HMI_SwitchInitScreen(void)
 inline void HMI_ModeScreen(void)
 {
     static byte old = 0;
+
+    //If the current probe INA219 is implemented.
+    #ifdef INA219
+        getCurrentVoltage();
+        char buffer[50];
+        sprintf(buffer, "V:%.2f A:%.2f W:%.1f", probCurrent.voltage_V, abs(probCurrent.current_mA), abs(probCurrent.power_mW));
+        printLCD(0, 0,buffer);
+    #endif
 
     if (old != Switch.Status)
     {
@@ -1704,13 +1720,10 @@ void loop(void)
     StepperDriverManage();
     PauseManage();
     ModeManage();
-    //HMI_Manage();
+    HMI_Manage();
 
     
-    //If the current probe INA219 is implemented.
-    #ifdef INA219
-        getCurrentVoltage();
-    #endif
+
 
     //If some text should be updated, also printMatrix() refresh the display.
     #ifdef MATRIX_LCD

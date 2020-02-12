@@ -99,4 +99,10 @@
 #define CLEAN19 "                   "
 #define CLEAN20 "                    "
 
+
+#ifdef INA219
+  #define VOLT "Volt: "
+  #define AMP "  Amp: "
+#endif // INA219 //
+
 #endif                 

@@ -38,7 +38,7 @@
   #define TEXT11 " Etat fin de course"
   #define TEXT12 " --> BP Homing"
   #define TEXT13 "  Homing en cours  "
-  #define TEXT14 "MODE   MOT Chau  CUT"
+  #define TEXT14 "MODE   MOT WIRE  CUT"
   #define TEXT15 "Manu"
   #define TEXT16 " PC "
   #define TEXT17 " Etat fin de course"

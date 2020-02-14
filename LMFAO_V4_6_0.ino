@@ -841,7 +841,7 @@ inline void ComputeRotaryEncoderHeatConsign(void)
             rotBtn.resetValueRot();
             if (Heat.WireConsign < 0)
                 Heat.WireConsign = 0;
-            else if (Heat.WireConsign > MAX_PERCENTAGE_WIRE)
+            if(Heat.WireConsign > MAX_PERCENTAGE_WIRE)
                 Heat.WireConsign = MAX_PERCENTAGE_WIRE;
         }
     #endif
@@ -929,7 +929,25 @@ inline void HeatingManage(byte mode)
     else
     {
         //OCR4C = Heat.WireConsign; // PWM for wire heating (stretch 0-100% to a range of 0-254)*/
-        analogWrite(PIN_WIRE_PWM, (Heat.WireConsign * 2.55));
+        //analogWrite(PIN_WIRE_PWM, (Heat.WireConsign * 2.55));
+        bool match = true;
+        uint8_t nbWhile = 0;        
+        float currentMesured = 0.0  ;
+        do
+        {
+            for (size_t i = 0; i < NB_ECH_PID; i++) currentMesured += ina219.getCurrent_mA();
+            currentMesured /=(float) NB_ECH_PID;
+
+            if(currentMesured>ORDER_CURRENT) Heat.PidConsign--;
+            else Heat.PidConsign++;
+
+            analogWrite(PIN_WIRE_PWM, Heat.PidConsign);
+            printSerialLn(Heat.PidConsign);
+            if((currentMesured <= (float)(ORDER_CURRENT+PID_MARGING_CURRENT)) && (currentMesured >= (float)(ORDER_CURRENT-PID_MARGING_CURRENT))) match = false;
+            nbWhile++; // Watchdog while            
+        } while ((nbWhile < PID_WATCHDOG_CURRENT ) && match);
+        Heat.WireConsign = Heat.PidConsign / 2.55;
+        
     }
 }
 
@@ -1278,6 +1296,17 @@ void printSerialLn(char const *str){
     #endif
 }
 
+void printSerialLn(double value){
+    #ifdef USART_ARDUINO
+        Serial.println(str);
+    #else
+        char str[20];
+        sprintf(str, "%lf", value); 
+        printSerial(str); 
+        printSerial("\n");
+    #endif
+}
+
 void printSerial(double value){
     #ifdef USART_ARDUINO
         Serial.print(value);
@@ -1465,9 +1494,23 @@ inline void HMI_ModeScreen(void)
     //If the current probe INA219 is implemented.
     #ifdef INA219
         getCurrentVoltage();
-        char buffer[50];
-        sprintf(buffer, "V:%.2f A:%.2f W:%.1f", probCurrent.voltage_V, abs(probCurrent.current_mA), abs(probCurrent.power_mW));
-        printLCD(0, 0,buffer);
+        if(probCurrent.nbEch >= NB_ECH_TO_DISPLAY){
+            probCurrent.nbEch = 0;
+            probCurrent.current_mA /= NB_ECH_TO_DISPLAY;
+            probCurrent.voltage_V /= NB_ECH_TO_DISPLAY;
+            probCurrent.power_mW /= NB_ECH_TO_DISPLAY;
+                
+            #ifdef D_INA219
+                printSerial(probCurrent.voltage_V); printSerial(" V");
+                printSerial("\t"); printSerial(probCurrent.current_mA); printSerial(" mA");
+                printSerial("\t"); printSerial(probCurrent.power_mW); printSerialLn(" mW");
+            #endif
+
+            char buffer[50];
+            float power = abs(probCurrent.current_mA/1000.0)*36.0;
+            sprintf(buffer, "V:%2d A:%1.2f        ", (int) probCurrent.voltage_V, (float) abs(probCurrent.current_mA/1000.0), (power<0.0)? 0:power);
+            printLCD(0, 0,buffer);
+        }
     #endif
 
     if (old != Switch.Status)
@@ -1602,7 +1645,11 @@ inline void HMI_DigitScreen(void)
 inline void HMI_Manage(void)
 {
     static unsigned long i = 0;
-    rotBtn.rotBtnRefresh();
+    
+    #ifdef HEAT_CONSIGN_ROTARY_ENCODER
+        rotBtn.rotBtnRefresh();
+    #endif
+    
     switch (HMI.State)
     {
     case HMI_MODE_SCREEN:
@@ -1695,18 +1742,11 @@ inline void ModeManage(void)
 void getCurrentVoltage(){
     
     #ifdef INA219
-        probCurrent.current_mA = ina219.getCurrent_mA();
-        probCurrent.power_mW = ina219.getPower_mW();
-        if(probCurrent.power_mW < 0.0) probCurrent.power_mW = probCurrent.power_mW * -1.0;
-        probCurrent.voltage_V = ina219.getBusVoltage_V() + (ina219.getShuntVoltage_mV() / 1000);
-
-        #ifdef D_INA219
-            printSerial(probCurrent.voltage_V); printSerial(" V");
-            printSerial("\t"); printSerial(probCurrent.current_mA); printSerial(" mA");
-            printSerial("\t"); printSerial(probCurrent.power_mW); printSerialLn(" mW");
-        #endif
-    
-    #endif
+        probCurrent.current_mA += ina219.getCurrent_mA();
+        probCurrent.power_mW += ina219.getPower_mW();
+        probCurrent.voltage_V += ina219.getBusVoltage_V() + (ina219.getShuntVoltage_mV() / 1000);
+        probCurrent.nbEch++;
+    #endif    
 }
 
 

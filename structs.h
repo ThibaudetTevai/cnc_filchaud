@@ -22,6 +22,7 @@ struct StructHeating
     byte WireConsign = 0;
     byte CutterConsign = 0;
     byte WireDynamique = 0;
+    uint8_t PidConsign = 0;
 } Heat;
 
 
@@ -52,6 +53,7 @@ struct ProbCurrent
     float voltage_V = 0;
     float current_mA = 0;
     float power_mW = 0;
+    int nbEch = 0;
 } probCurrent;
 
 

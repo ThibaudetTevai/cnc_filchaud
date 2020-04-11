@@ -18,6 +18,6 @@
 #include "lcd/20x04/LiquidCrystal.h"
 #include "rotBtn/rotBtn.h"
 #include "utils/utility.h"
-#include "ina219/Adafruit_INA219.h"
+#include "ina219/INA2xx.h"
 
 #endif

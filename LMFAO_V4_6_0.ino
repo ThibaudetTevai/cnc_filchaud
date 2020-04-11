@@ -77,9 +77,9 @@ byte Val_Y2_Limit; // "0" fdc Y2 non sollicité
     LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
 
-#ifdef INA219
+#ifdef _INA226
     //INA 219 declaration for the prob current
-    Adafruit_INA219 ina219;
+    INA_Class ina219;
 #endif
 
 #ifdef HEAT_CONSIGN_ROTARY_ENCODER
@@ -155,9 +155,14 @@ void setup(void)
         lcdMatrix.setup();
     #endif
 
-    // INA219
-    #ifdef INA219
-        ina219.begin(); // Init I2C and calibration 32V 2A
+    // INA226
+    #ifdef _INA226
+        while (ina219.begin(4, INA226_RESISTOR) == 0); // Init I2C and calibration 36V 4A
+        //ina219.setBusConversion(1000);            // Maximum conversion time 8.244ms
+        //ina219.setShuntConversion(1000);          // Maximum conversion time 8.244ms
+        //ina219.setAveraging(10);                 // Average each reading n-times
+        ina219.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
+        //ina219.AlertOnBusOverVoltage(true,5000);  // Trigger alert if over 5V on bus
     #endif
 
 
@@ -650,7 +655,7 @@ void Trait_Arr_fdc()
     testPosIntDem();
     clearLCD();
     
-    #ifndef INA219
+    #ifndef _INA226
         printLCD(0, 0, MachineName);
     #endif
     printLCD(0, 1, TEXT14);
@@ -716,7 +721,7 @@ inline void PauseManage(void)
             ActivePause = 0;
             kPause = 0;
             printLCD(0, 0, CLEAN19);
-            #ifdef INA219
+            #ifdef _INA226
                 printLCD(0, 0, MachineName);
             #endif
             ENABLE_T5_ISR();
@@ -926,28 +931,44 @@ inline void HeatingManage(byte mode)
 
         analogWrite(PIN_WIRE_PWM, (Heat.WireDynamique * 2.55));
     }
-    else
+    else if(!Switch.HeatManu)
     {
         //OCR4C = Heat.WireConsign; // PWM for wire heating (stretch 0-100% to a range of 0-254)*/
-        //analogWrite(PIN_WIRE_PWM, (Heat.WireConsign * 2.55));
+#ifndef _INA226
+        analogWrite(PIN_WIRE_PWM, Heat.WireConsign * 2.55);
+#else
         bool match = true;
         uint8_t nbWhile = 0;        
         float currentMesured = 0.0  ;
         do
         {
-            for (size_t i = 0; i < NB_ECH_PID; i++) currentMesured += ina219.getCurrent_mA();
-            currentMesured /=(float) NB_ECH_PID;
-
-            if(currentMesured>ORDER_CURRENT) Heat.PidConsign--;
+            currentMesured = abs(ina219.getBusMicroAmps()/1000.0); // Get the current fro INA in mA
+            float currentOrder = (float) Heat.WireConsign*(MAX_CURRENT/100.0); // Value in mA
+            if(currentOrder > MAX_CURRENT) currentOrder = MAX_CURRENT;
+            if(currentMesured>(currentOrder+PID_MARGING_CURRENT)) Heat.PidConsign--;
             else Heat.PidConsign++;
 
+            if(Heat.PidConsign > 255) Heat.PidConsign = 255;
+            else if(Heat.PidConsign < 0) Heat.PidConsign = 0;
+
             analogWrite(PIN_WIRE_PWM, Heat.PidConsign);
+    #ifdef DEBUG_INA
+            printSerialLn("\n");
+            printSerial(currentMesured);
+            printSerial("\t");
+            printSerial(currentOrder);
+            printSerial("\t");
             printSerialLn(Heat.PidConsign);
-            if((currentMesured <= (float)(ORDER_CURRENT+PID_MARGING_CURRENT)) && (currentMesured >= (float)(ORDER_CURRENT-PID_MARGING_CURRENT))) match = false;
+    #endif
+            if((currentMesured <= (float)(currentOrder+PID_MARGING_CURRENT)) && (currentMesured >= (float)(currentOrder-PID_MARGING_CURRENT))) match = false;
             nbWhile++; // Watchdog while            
         } while ((nbWhile < PID_WATCHDOG_CURRENT ) && match);
         Heat.WireConsign = Heat.PidConsign / 2.55;
-        
+#endif        
+    }
+    else {
+        Heat.WireConsign = 0;
+        analogWrite(PIN_WIRE_PWM, Heat.WireConsign * 2.55);
     }
 }
 
@@ -1472,7 +1493,7 @@ inline bool HMI_SwitchInitScreen(void)
 
     clearLCD();
     
-    #ifdef INA219
+    #ifdef _INA226
         printLCD(0, 0, MachineName);
     #endif
     printLCD(0, 1, TEXT14);
@@ -1491,16 +1512,16 @@ inline void HMI_ModeScreen(void)
 {
     static byte old = 0;
 
-    //If the current probe INA219 is implemented.
-    #ifdef INA219
-        getCurrentVoltage();
-        if(probCurrent.nbEch >= NB_ECH_TO_DISPLAY){
-            probCurrent.nbEch = 0;
-            probCurrent.current_mA /= NB_ECH_TO_DISPLAY;
-            probCurrent.voltage_V /= NB_ECH_TO_DISPLAY;
-            probCurrent.power_mW /= NB_ECH_TO_DISPLAY;
+    //If the current probe INA226 is implemented.
+    #ifdef _INA226
+        probCurrent.nbEch++; 
+        if(probCurrent.nbEch >= NB_ECH_TO_DISPLAY-1){
+            probCurrent.nbEch = 0; 
+            probCurrent.current_mA = ina219.getBusMicroAmps()/1000.0;
+            probCurrent.power_mW = ina219.getBusMicroWatts()/1000.0;
+            probCurrent.voltage_V = ina219.getShuntMicroVolts()/1000.0;
                 
-            #ifdef D_INA219
+            #ifdef DEBUG_INA
                 printSerial(probCurrent.voltage_V); printSerial(" V");
                 printSerial("\t"); printSerial(probCurrent.current_mA); printSerial(" mA");
                 printSerial("\t"); printSerial(probCurrent.power_mW); printSerialLn(" mW");
@@ -1508,7 +1529,7 @@ inline void HMI_ModeScreen(void)
 
             char buffer[50];
             float power = abs(probCurrent.current_mA/1000.0)*36.0;
-            sprintf(buffer, "V:%2d A:%1.2f        ", (int) probCurrent.voltage_V, (float) abs(probCurrent.current_mA/1000.0), (power<0.0)? 0:power);
+            sprintf(buffer, "V:%2d A:%1.2f        ", (int)  abs(probCurrent.voltage_V), (float) abs(probCurrent.current_mA/1000.0), (power<0.0)? 0:power);
             printLCD(0, 0,buffer);
         }
     #endif
@@ -1664,8 +1685,13 @@ inline void HMI_Manage(void)
         break;
 
     case HMI_INIT_DELAY:
+#ifndef SUPPRESS_INIT_SCREEN
         if (i < millis())
             HMI.State = HMI_PARAMS_SCREEN;
+#else
+            HMI.State = HMI_SWITCH_SCREEN;
+            clearLCD();
+#endif
         break;
 
     case HMI_PARAMS_SCREEN:
@@ -1738,18 +1764,6 @@ inline void ModeManage(void)
         break;
     }
 }
-
-void getCurrentVoltage(){
-    
-    #ifdef INA219
-        probCurrent.current_mA += ina219.getCurrent_mA();
-        probCurrent.power_mW += ina219.getPower_mW();
-        probCurrent.voltage_V += ina219.getBusVoltage_V() + (ina219.getShuntVoltage_mV() / 1000);
-        probCurrent.nbEch++;
-    #endif    
-}
-
-
 
 /**********************************************************************************/
 /**** The main loop                                                           *****/

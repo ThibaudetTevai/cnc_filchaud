@@ -19,13 +19,14 @@
 #define MATRIX_LCD
 
 // For fast debuging
-//#define SUPPRESS_INIT_SCREEN
+#define SUPPRESS_INIT_SCREEN
 
 // WORK IN PROGRESS : The INA226 is a Current / Voltage prob.
-//#define _INA226
+#define _INA226
 #define INA226_RESISTOR 100000 //36300
+#define NB_SAMPLE_DISPLAY_INA 5.0
 #define DEBUG_INA
-#define MAX_CURRENT 1000.0 // Witch 50 Ohm Resistor
+#define MAX_CURRENT 1500.0 // Witch 14 Ohm Resistor
 #define NB_ECH_TO_DISPLAY 10 // Nb ech to getcurrent before to show on the display
 #define NB_ECH_PID 10.0// Just a proportional actualy
 #define PID_WATCHDOG_CURRENT 10

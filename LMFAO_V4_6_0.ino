@@ -158,7 +158,7 @@ void setup(void)
     // INA226
     #ifdef _INA226
         while (ina219.begin(4, INA226_RESISTOR) == 0); // Init I2C and calibration 36V 4A
-        //ina219.setBusConversion(1000);            // Maximum conversion time 8.244ms
+        //ina219.setBusConversion(8244);            // Maximum conversion time 8.244ms
         //ina219.setShuntConversion(1000);          // Maximum conversion time 8.244ms
         //ina219.setAveraging(10);                 // Average each reading n-times
         ina219.setMode(INA_MODE_CONTINUOUS_BOTH); // Bus/shunt measured continuously
@@ -945,11 +945,12 @@ inline void HeatingManage(byte mode)
             currentMesured = abs(ina219.getBusMicroAmps()/1000.0); // Get the current fro INA in mA
             float currentOrder = (float) Heat.WireConsign*(MAX_CURRENT/100.0); // Value in mA
             if(currentOrder > MAX_CURRENT) currentOrder = MAX_CURRENT;
-            if(currentMesured>(currentOrder+PID_MARGING_CURRENT)) Heat.PidConsign--;
+            if(currentMesured>currentOrder) Heat.PidConsign--;
             else Heat.PidConsign++;
 
             if(Heat.PidConsign > 255) Heat.PidConsign = 255;
-            else if(Heat.PidConsign < 0) Heat.PidConsign = 0;
+            else if(Heat.PidConsign < 0) Heat.PidConsign = 0;            
+            if(currentOrder < PID_MARGING_CURRENT) Heat.PidConsign = 0;
 
             analogWrite(PIN_WIRE_PWM, Heat.PidConsign);
     #ifdef DEBUG_INA
@@ -1516,10 +1517,16 @@ inline void HMI_ModeScreen(void)
     #ifdef _INA226
         probCurrent.nbEch++; 
         if(probCurrent.nbEch >= NB_ECH_TO_DISPLAY-1){
-            probCurrent.nbEch = 0; 
-            probCurrent.current_mA = ina219.getBusMicroAmps()/1000.0;
-            probCurrent.power_mW = ina219.getBusMicroWatts()/1000.0;
-            probCurrent.voltage_V = ina219.getShuntMicroVolts()/1000.0;
+            probCurrent.nbEch = 0;
+            for (size_t i = 0; i < NB_SAMPLE_DISPLAY_INA-1; i++){
+                probCurrent.current_mA += ina219.getBusMicroAmps()/1000.0;
+                probCurrent.power_mW += ina219.getBusMicroWatts()/1000.0;
+                probCurrent.voltage_V += ina219.getShuntMicroVolts()/1000.0;
+            }
+            
+            probCurrent.current_mA /= NB_SAMPLE_DISPLAY_INA;
+            probCurrent.power_mW /= NB_SAMPLE_DISPLAY_INA;
+            probCurrent.voltage_V /= NB_SAMPLE_DISPLAY_INA;
                 
             #ifdef DEBUG_INA
                 printSerial(probCurrent.voltage_V); printSerial(" V");
